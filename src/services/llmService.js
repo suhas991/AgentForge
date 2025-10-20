@@ -1,39 +1,44 @@
-// src/services/llmService.js
+// src/services/llmService.js - Update the model handling
+const getApiKey = () => {
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env.VITE_GEMINI_API_KEY;
+  }
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.REACT_APP_GEMINI_API_KEY;
+  }
+  return null;
+};
+
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
 export const executeAgent = async (agent, userInput, customParams = {}) => {
   const systemPrompt = buildSystemPrompt(agent, customParams);
   const geminiParams = extractGeminiParameters(customParams);
   
-  // Use import.meta.env instead of process.env for Vite
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const apiKey = getApiKey();
 
   if (!apiKey) {
-    throw new Error('VITE_GEMINI_API_KEY not found in environment variables');
+    throw new Error('API Key not found. Please set VITE_GEMINI_API_KEY in your .env file');
   }
 
   try {
-    const model = agent.model || 'gemini-2.0-flash-exp';
+    // Use the model from agent, fallback to gemini-2.0-flash
+    const model = agent.model || 'gemini-2.0-flash';
     const url = `${GEMINI_API_BASE}/models/${model}:generateContent?key=${apiKey}`;
 
-    // Combine system prompt and user input
     const fullPrompt = `${systemPrompt}\n\n---\n\nUser Input:\n${userInput}`;
 
     const requestBody = {
       contents: [
         {
-          parts: [
-            {
-              text: fullPrompt
-            }
-          ]
+          parts: [{ text: fullPrompt }]
         }
       ],
       generationConfig: {
         temperature: geminiParams.temperature || 0.7,
         topK: geminiParams.topK || 40,
         topP: geminiParams.topP || 0.95,
-        maxOutputTokens: geminiParams.maxOutputTokens || 2048,
+        maxOutputTokens: geminiParams.maxOutputTokens || 8192,
       }
     };
 
@@ -51,8 +56,6 @@ export const executeAgent = async (agent, userInput, customParams = {}) => {
     }
 
     const data = await response.json();
-    
-    // Extract text from Gemini response
     return data.candidates[0].content.parts[0].text;
 
   } catch (error) {
@@ -70,7 +73,6 @@ Task Description: ${agent.taskDescription}
 
 Expected Output Format: ${agent.expectedOutput}`;
 
-  // Add custom context parameters (like tone, mood, style)
   const contextParams = Object.entries(customParams).filter(
     ([key]) => !['temperature', 'max_tokens', 'top_p', 'top_k'].includes(key)
   );
@@ -102,10 +104,10 @@ const extractGeminiParameters = (customParams) => {
     }
   });
 
-  // Set default maxOutputTokens to 8192 if not specified (Gemini 2.0 supports up to 8k)
   if (!geminiParams.maxOutputTokens) {
     geminiParams.maxOutputTokens = 8192;
   }
 
   return geminiParams;
 };
+    

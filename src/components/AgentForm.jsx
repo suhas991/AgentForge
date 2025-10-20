@@ -7,18 +7,38 @@ const AgentForm = ({ agent, onSave, onCancel }) => {
     name: '',
     role: '',
     goal: '',
-    model: 'gemini-2.0-flash-exp',
+    model: 'gemini-2.0-flash',
     taskDescription: '',
     expectedOutput: '',
     customParameters: [],
   });
 
   const models = [
-    'gemini-2.0-flash-exp',
-    'gemini-2.5-flash',
-    'gemini-1.5-pro',
-    'gemini-1.5-flash',
-    'gemini-pro',
+    {
+      id: 'gemini-2.5-pro',
+      name: 'Gemini 2.5 Pro',
+      description: 'Most capable model'
+    },
+    {
+      id: 'gemini-2.5-flash',
+      name: 'Gemini 2.5 Flash',
+      description: 'Fast and efficient'
+    },
+    {
+      id: 'gemini-2.0-flash',
+      name: 'Gemini 2.0 Flash',
+      description: 'High throughput'
+    },
+    {
+      id: 'gemini-2.5-flash-lite',
+      name: 'Gemini 2.5 Flash Lite',
+      description: 'Lightweight and fast'
+    },
+    {
+      id: 'gemini-2.0-flash-lite',
+      name: 'Gemini 2.0 Flash Lite',
+      description: 'Ultra lightweight'
+    }
   ];
 
   useEffect(() => {
@@ -84,9 +104,16 @@ const AgentForm = ({ agent, onSave, onCancel }) => {
 
       <div className="form-group">
         <label>Model</label>
-        <select name="model" value={formData.model} onChange={handleChange}>
+        <select 
+          name="model" 
+          value={formData.model} 
+          onChange={handleChange}
+          className="model-select"
+        >
           {models.map(model => (
-            <option key={model} value={model}>{model}</option>
+            <option key={model.id} value={model.id}>
+              {model.name} - {model.description}
+            </option>
           ))}
         </select>
       </div>
