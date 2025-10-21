@@ -58,7 +58,6 @@ body {
 }
 
 .app-header h1::before {
-  content: '🤖';
   font-size: 36px;
 }
 
@@ -1638,3 +1637,234 @@ th {
     height: 56px;
   }
 }
+/* Update Header Styles */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--border);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.app-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Remove the emoji from h1 */
+.app-header h1::before {
+  content: '';
+}
+
+.app-header .btn-primary svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-left {
+    gap: 12px;
+  }
+
+  .app-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .app-header h1 {
+    font-size: 24px;
+  }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  background: var(--background);
+  border-radius: 8px;
+}
+
+/* User Menu Styles */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-menu-wrapper {
+  position: relative;
+}
+
+.user-info-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.user-info-button:hover {
+  background: var(--surface);
+  border-color: var(--primary);
+}
+
+.user-avatar {
+  font-size: 18px;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.user-info-button svg {
+  color: var(--text-secondary);
+  transition: transform 0.2s;
+}
+
+.user-menu-wrapper:has(.user-menu-dropdown) .user-info-button svg {
+  transform: rotate(180deg);
+}
+
+.user-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  min-width: 240px;
+  z-index: 1000;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-menu-header {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-menu-header strong {
+  font-size: 15px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.user-menu-header span {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.user-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 8px;
+}
+
+.user-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.user-menu-item:hover {
+  background: var(--background);
+}
+
+.user-menu-item:first-of-type {
+  border-radius: 0;
+}
+
+.user-menu-item:last-of-type {
+  border-radius: 0 0 12px 12px;
+}
+
+.user-menu-item svg {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.user-menu-item.danger {
+  color: var(--danger);
+}
+
+.user-menu-item.danger svg {
+  color: var(--danger);
+}
+
+.user-menu-item.danger:hover {
+  background: #fef2f2;
+}
+
+/* Close dropdown when clicking outside */
+@media (max-width: 768px) {
+  .user-menu-dropdown {
+    position: fixed;
+    top: auto;
+    bottom: 80px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+}
+

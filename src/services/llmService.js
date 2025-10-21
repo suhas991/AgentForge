@@ -1,44 +1,60 @@
-// src/services/llmService.js - Update the model handling
-const getApiKey = () => {
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    return import.meta.env.VITE_GEMINI_API_KEY;
-  }
-  if (typeof process !== 'undefined' && process.env) {
-    return process.env.REACT_APP_GEMINI_API_KEY;
-  }
-  return null;
-};
+// src/services/llmService.js
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
-export const executeAgent = async (agent, userInput, customParams = {}) => {
+// Get API key from user config (localStorage) first, fallback to env
+const getApiKey = () => {
+  // First check user config from onboarding
+  const userConfig = localStorage.getItem('userConfig');
+  if (userConfig) {
+    try {
+      const config = JSON.parse(userConfig);
+      if (config.apiKey) {
+        return config.apiKey;
+      }
+    } catch (error) {
+      console.error('Error parsing user config:', error);
+    }
+  }
+
+  // Fallback to environment variable (for development)
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env.VITE_GEMINI_API_KEY;
+  }
+  
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.REACT_APP_GEMINI_API_KEY;
+  }
+  
+  return null;
+};
+
+export const executeAgent = async (agent, userInput, customParams) => {
   const systemPrompt = buildSystemPrompt(agent, customParams);
   const geminiParams = extractGeminiParameters(customParams);
   
   const apiKey = getApiKey();
-
+  
   if (!apiKey) {
-    throw new Error('API Key not found. Please set VITE_GEMINI_API_KEY in your .env file');
+    throw new Error('API Key not found. Please configure your API key in settings or onboarding.');
   }
 
   try {
     // Use the model from agent, fallback to gemini-2.0-flash
-    const model = agent.model || 'gemini-2.0-flash';
+    const model = agent.model;
     const url = `${GEMINI_API_BASE}/models/${model}:generateContent?key=${apiKey}`;
-
-    const fullPrompt = `${systemPrompt}\n\n---\n\nUser Input:\n${userInput}`;
-
+    
+    const fullPrompt = `${systemPrompt}\n\n---\n\nInput:\n${userInput}`;
+    
     const requestBody = {
-      contents: [
-        {
-          parts: [{ text: fullPrompt }]
-        }
-      ],
+      contents: [{
+        parts: [{ text: fullPrompt }]
+      }],
       generationConfig: {
         temperature: geminiParams.temperature || 0.7,
         topK: geminiParams.topK || 40,
         topP: geminiParams.topP || 0.95,
-        maxOutputTokens: geminiParams.maxOutputTokens || 8192,
+        maxOutputTokens: geminiParams.maxOutputTokens || 8000,
       }
     };
 
@@ -57,7 +73,6 @@ export const executeAgent = async (agent, userInput, customParams = {}) => {
 
     const data = await response.json();
     return data.candidates[0].content.parts[0].text;
-
   } catch (error) {
     console.error('Gemini API Error:', error);
     throw new Error(`Failed to execute agent: ${error.message}`);
@@ -65,25 +80,20 @@ export const executeAgent = async (agent, userInput, customParams = {}) => {
 };
 
 const buildSystemPrompt = (agent, customParams) => {
-  let prompt = `You are a ${agent.role}.
-
-Your goal is: ${agent.goal}
-
-Task Description: ${agent.taskDescription}
-
-Expected Output Format: ${agent.expectedOutput}`;
-
+  let prompt = `You are a ${agent.role}.\n\nYour goal is: ${agent.goal}\n\nTask Description:\n${agent.taskDescription}\n\nExpected Output Format:\n${agent.expectedOutput}`;
+  
+  // Add context parameters (excluding Gemini-specific params)
   const contextParams = Object.entries(customParams).filter(
-    ([key]) => !['temperature', 'max_tokens', 'top_p', 'top_k'].includes(key)
+    ([key]) => !['temperature', 'maxtokens', 'topp', 'topk'].includes(key.toLowerCase())
   );
-
+  
   if (contextParams.length > 0) {
-    prompt += '\n\nAdditional Context:';
+    prompt += '\n\nContext:';
     contextParams.forEach(([key, value]) => {
       prompt += `\n- ${key}: ${value}`;
     });
   }
-
+  
   return prompt;
 };
 
@@ -92,22 +102,21 @@ const extractGeminiParameters = (customParams) => {
   
   const paramMapping = {
     'temperature': 'temperature',
-    'max_tokens': 'maxOutputTokens',
-    'top_p': 'topP',
-    'top_k': 'topK',
+    'maxtokens': 'maxOutputTokens',
+    'topp': 'topP',
+    'topk': 'topK',
   };
-
+  
   Object.entries(customParams).forEach(([key, value]) => {
-    if (paramMapping[key]) {
-      const geminiKey = paramMapping[key];
+    if (paramMapping[key.toLowerCase()]) {
+      const geminiKey = paramMapping[key.toLowerCase()];
       geminiParams[geminiKey] = parseFloat(value) || value;
     }
   });
-
+  
   if (!geminiParams.maxOutputTokens) {
     geminiParams.maxOutputTokens = 8192;
   }
-
+  
   return geminiParams;
 };
-    

@@ -3,19 +3,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 const ChatBot = ({ isOpen, onToggle, onSendMessage, agentName }) => {
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: `Hi! 👋 I'm the **Agent Builder Assistant**. 
+const [messages, setMessages] = useState([
+  {
+    role: 'assistant',
+    content: `Hi! 👋 I'm the **AgentForge Assistant**. 
 
 I can help you create well-structured AI agents. Just describe what you want!
 
-**Examples:**
+*Examples:*
 - "I need an agent that writes marketing emails"
 - "Create an agent for data analysis"
 - "Help me build a customer support agent"`
-    }
-  ]);
+  }
+]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -77,7 +77,7 @@ I can help you create well-structured AI agents. Just describe what you want!
       <button 
         className={`chatbot-toggle ${isOpen ? 'open' : ''}`}
         onClick={onToggle}
-        title="Agent Builder Assistant"
+        title="AgentForge Assistant"
       >
         {isOpen ? (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -89,7 +89,7 @@ I can help you create well-structured AI agents. Just describe what you want!
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
           </svg>
         )}
-        {!isOpen && <span className="chatbot-badge">AI Helper</span>}
+        {!isOpen && <span className="chatbot-badge">AgentForge Helper</span>}
       </button>
 
       <div className={`chatbot-sidebar ${isOpen ? 'open' : ''}`}>

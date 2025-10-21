@@ -1,10 +1,13 @@
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
+import LandingPage from './components/LandingPage';
+import OnboardingModal from './components/OnboardingModal';
 import AgentCard from './components/AgentCard';
 import AgentFormModal from './components/AgentFormModal';
 import RunAgentModal from './components/RunAgentModal';
 import ChatBot from './components/ChatBot';
 import MobileBlocker from './components/MobileBlocker';
+import SettingsModal from './components/SettingsModal'; // ADD THIS IMPORT
 import { 
   initDB, 
   saveAgent, 
@@ -15,6 +18,7 @@ import {
 import { executeAgent } from './services/llmService';
 import { DEFAULT_AGENTS } from './constants/defaultAgents';
 import './App.css';
+import logo from '/vite.png';
 
 function App() {
   const [agents, setAgents] = useState([]);
@@ -23,9 +27,14 @@ function App() {
   const [runningAgent, setRunningAgent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isChatBotOpen, setIsChatBotOpen] = useState(false);
-
-  // Check if device is mobile/tablet
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [showSettings, setShowSettings] = useState(false);
+  
+  // Onboarding states
+  const [showLanding, setShowLanding] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [userConfig, setUserConfig] = useState(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -37,8 +46,31 @@ function App() {
   }, []);
 
   useEffect(() => {
-    initializeApp();
+    checkUserConfig();
   }, []);
+
+  // ADD THIS: Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showUserMenu && !event.target.closest('.user-menu-wrapper')) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showUserMenu]);
+
+  const checkUserConfig = async () => {
+    const savedConfig = localStorage.getItem('userConfig');
+    if (savedConfig) {
+      setUserConfig(JSON.parse(savedConfig));
+      setShowLanding(false);
+      await initializeApp();
+    } else {
+      setIsLoading(false);
+    }
+  };
 
   const initializeApp = async () => {
     try {
@@ -71,6 +103,27 @@ function App() {
       return 0;
     });
     setAgents(sortedAgents);
+  };
+
+  const handleGetStarted = () => {
+    setShowOnboarding(true);
+  };
+
+  const handleOnboardingComplete = async (config) => {
+    setUserConfig(config);
+    setShowOnboarding(false);
+    setShowLanding(false);
+    setIsLoading(true);
+    await initializeApp();
+  };
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout? This will clear your configuration.')) {
+      localStorage.removeItem('userConfig');
+      setUserConfig(null);
+      setShowLanding(true);
+      setAgents([]);
+    }
   };
 
   const handleSaveAgent = async (agentData) => {
@@ -120,12 +173,27 @@ function App() {
     return <MobileBlocker />;
   }
 
+  // Show landing page if not configured
+  if (showLanding && !isLoading) {
+    return (
+      <>
+        <LandingPage onGetStarted={handleGetStarted} />
+        {showOnboarding && (
+          <OnboardingModal
+            onComplete={handleOnboardingComplete}
+            onClose={() => setShowOnboarding(false)}
+          />
+        )}
+      </>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="app">
         <div className="loading-state">
           <div className="spinner"></div>
-          <p>Initializing Agent Builder...</p>
+          <p>Initializing AgentForge...</p>
         </div>
       </div>
     );
@@ -134,20 +202,75 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>AI Agent Builder</h1>
-        <button 
-          onClick={() => {
-            setEditingAgent(null);
-            setShowFormModal(true);
-          }}
-          className="btn-primary"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          Create New Agent
-        </button>
+        <div className="header-left">
+          <img src={logo} className="app-logo" alt="AgentForge Logo" />
+          <h1>AgentForge</h1>
+        </div>
+        <div className="header-right">
+          <div className="user-menu-wrapper">
+            <button 
+              className="user-info-button"
+              onClick={() => setShowUserMenu(!showUserMenu)}
+            >
+              <span className="user-avatar">👤</span>
+              <span className="user-name">{userConfig?.name}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            
+            {showUserMenu && (
+              <div className="user-menu-dropdown">
+                <div className="user-menu-header">
+                  <strong>{userConfig?.name}</strong>
+                  <span>{userConfig?.email}</span>
+                </div>
+                <div className="user-menu-divider"></div>
+                <button 
+                  className="user-menu-item"
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    setShowSettings(true);
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M12 1v6m0 6v6m5.2-13.2l-1.5 1.5m-7.4 7.4l-1.5 1.5m13.2-.3l-1.5-1.5m-7.4-7.4l-1.5-1.5"></path>
+                  </svg>
+                  Settings
+                </button>
+                <button 
+                  className="user-menu-item danger"
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    handleLogout();
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+          
+          <button 
+            onClick={() => {
+              setEditingAgent(null);
+              setShowFormModal(true);
+            }}
+            className="btn-primary"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Build New Agent
+          </button>
+        </div>
       </header>
 
       {helperAgent && !isChatBotOpen && (
@@ -155,7 +278,7 @@ function App() {
           <div className="helper-icon">💡</div>
           <div className="helper-content">
             <h3>Need help building agents?</h3>
-            <p>Click the chat icon in the bottom right to talk with the <strong>Agent Builder Assistant</strong>!</p>
+            <p>Click the chat icon in the bottom right to talk with the <strong>AgentForge Assistant</strong>!</p>
           </div>
         </div>
       )}
@@ -198,8 +321,17 @@ function App() {
         isOpen={isChatBotOpen}
         onToggle={() => setIsChatBotOpen(!isChatBotOpen)}
         onSendMessage={handleChatBotMessage}
-        agentName={helperAgent?.name || 'AI Assistant'}
+        agentName={'AgentForge Assistant'}
       />
+
+      {/* ADD SETTINGS MODAL HERE - AFTER CHATBOT */}
+      {showSettings && (
+        <SettingsModal
+          onClose={() => setShowSettings(false)}
+          currentConfig={userConfig}
+          onSave={setUserConfig}
+        />
+      )}
     </div>
   );
 }

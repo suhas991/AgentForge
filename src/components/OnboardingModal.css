@@ -1,0 +1,256 @@
+/* src/components/OnboardingModal.css */
+.onboarding-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.onboarding-modal {
+  background: white;
+  border-radius: 20px;
+  max-width: 600px;
+  width: 100%;
+  padding: 48px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.onboarding-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboarding-close:hover {
+  background: #f1f5f9;
+}
+
+.onboarding-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 48px;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  transition: all 0.3s;
+}
+
+.progress-step.active .progress-circle {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+}
+
+.progress-step span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.progress-step.active span {
+  color: #6366f1;
+}
+
+.progress-line {
+  width: 80px;
+  height: 2px;
+  background: #e2e8f0;
+  margin: 0 16px;
+}
+
+.onboarding-step h2 {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.onboarding-step > p {
+  font-size: 16px;
+  color: #64748b;
+  margin-bottom: 32px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.form-group input.error {
+  border-color: #ef4444;
+}
+
+.error-message {
+  display: block;
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.info-box {
+  background: linear-gradient(135deg, #e0f2fe, #dbeafe);
+  border: 2px solid #3b82f6;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 12px;
+}
+
+.info-box svg {
+  flex-shrink: 0;
+  color: #3b82f6;
+}
+
+.info-box strong {
+  display: block;
+  color: #1e40af;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.info-box p {
+  color: #1e40af;
+  font-size: 13px;
+  margin: 0;
+}
+
+.info-box a {
+  color: #2563eb;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.security-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.security-note svg {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.btn-onboarding-primary,
+.btn-onboarding-secondary {
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  font-size: 15px;
+  border: none;
+}
+
+.btn-onboarding-primary {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-onboarding-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+.btn-onboarding-secondary {
+  background: white;
+  color: #1e293b;
+  border: 2px solid #e2e8f0;
+}
+
+.btn-onboarding-secondary:hover {
+  border-color: #6366f1;
+  color: #6366f1;
+}
+
+.onboarding-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.onboarding-actions .btn-onboarding-primary {
+  flex: 1;
+}
