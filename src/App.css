@@ -1868,3 +1868,129 @@ th {
   }
 }
 
+/* src/components/ImportAgentsModal.css */
+
+.import-modal {
+  max-width: 600px;
+}
+
+.file-upload-area {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: var(--background);
+}
+
+.file-upload-area:hover {
+  border-color: var(--primary);
+  background: var(--surface);
+}
+
+.upload-icon {
+  margin-bottom: 16px;
+  color: var(--primary);
+}
+
+.upload-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.upload-hint {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.error-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-top: 16px;
+}
+
+.error-box svg {
+  flex-shrink: 0;
+}
+
+.preview-section {
+  margin-top: 24px;
+}
+
+.preview-section h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.preview-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.preview-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--surface);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.preview-item:last-child {
+  margin-bottom: 0;
+}
+
+.preview-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.preview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.preview-info strong {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.preview-info span {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+/* Export button styling - matches existing button design */
+.btn-export {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.btn-export:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+}
