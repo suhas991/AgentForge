@@ -1,0 +1,154 @@
+/* Target the message bubble container */
+.message-bubble {
+  font-size: 14px;
+  line-height: 1.3 !important;
+}
+
+/* All direct children of message bubble */
+.message-bubble > * {
+  margin: 0 !important;
+  line-height: 1.3 !important;
+}
+
+/* Paragraphs - minimal spacing */
+.message-bubble p,
+.message-bubble .md-p {
+  margin: 0 0 6px 0 !important;
+  line-height: 1.3 !important;
+}
+
+.message-bubble p:last-child,
+.message-bubble .md-p:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Headers - minimal spacing */
+.message-bubble h1,
+.message-bubble h2,
+.message-bubble h3,
+.message-bubble h4,
+.message-bubble .md-h1,
+.message-bubble .md-h2,
+.message-bubble .md-h3,
+.message-bubble .md-h4 {
+  margin: 8px 0 4px 0 !important;
+  line-height: 1.2 !important;
+}
+
+.message-bubble h1:first-child,
+.message-bubble h2:first-child,
+.message-bubble h3:first-child,
+.message-bubble .md-h1:first-child,
+.message-bubble .md-h2:first-child,
+.message-bubble .md-h3:first-child {
+  margin-top: 0 !important;
+}
+
+/* Lists - minimal spacing */
+.message-bubble ul,
+.message-bubble ol,
+.message-bubble .md-ul,
+.message-bubble .md-ol {
+  margin: 4px 0 !important;
+  padding-left: 18px !important;
+  line-height: 1.3 !important;
+}
+
+.message-bubble li,
+.message-bubble .md-li {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.3 !important;
+}
+
+/* Code blocks */
+.message-bubble code,
+.message-bubble .md-code-inline {
+  line-height: 1.3 !important;
+  padding: 1px 4px;
+  margin: 0 1px;
+}
+
+.message-bubble pre {
+  margin: 8px 0 !important;
+  line-height: 1.3 !important;
+}
+
+/* Links and emphasis */
+.message-bubble a,
+.message-bubble strong,
+.message-bubble em,
+.message-bubble .md-link,
+.message-bubble .md-strong,
+.message-bubble .md-em {
+  line-height: inherit !important;
+}
+
+/* Remove all ReactMarkdown wrapper spacing */
+.message-bubble > div {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* User messages - keep simple */
+.message.user .message-bubble {
+  line-height: 1.4 !important;
+}
+
+/* Remove any default browser spacing */
+.message-bubble * {
+  margin-block-start: 0 !important;
+  margin-block-end: 0 !important;
+}
+
+/* Import Agent Button */
+.import-agent-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.import-agent-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.import-agent-btn svg {
+  width: 14px;
+  height: 14px;
+}
+/* Fix code block overflow in chatbot */
+.message-bubble .md-code-block,
+.message-bubble pre,
+.message-bubble code {
+  max-width: 100%;
+  overflow-x: auto;
+  word-wrap: break-word;
+  white-space: pre-wrap !important;
+  word-break: break-all;
+}
+
+/* Ensure ReactMarkdown code blocks wrap */
+.message-bubble pre code {
+  display: block;
+  white-space: pre-wrap !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* If using syntax highlighter */
+.message-bubble [class*="language-"] {
+  white-space: pre-wrap !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}

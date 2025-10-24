@@ -6,7 +6,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import CopyButton from './CopyButton';
 import { GEMINI_MODELS, getModelName } from '../constants/models';
-import "./RunAgentModel.css"
+import './RunAgentModal.css';
 
 const RunAgentModal = ({ agent, onRun, onClose }) => {
   const [input, setInput] = useState('');
@@ -14,6 +14,7 @@ const RunAgentModal = ({ agent, onRun, onClose }) => {
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState(agent.model);
+  const [error, setError] = useState(null); // Added error state
 
   React.useEffect(() => {
     const defaults = {};
@@ -27,18 +28,83 @@ const RunAgentModal = ({ agent, onRun, onClose }) => {
     setCustomParamValues(prev => ({ ...prev, [key]: value }));
   };
 
+  const parseErrorMessage = (errorMessage) => {
+    // Check for quota exceeded error
+    if (errorMessage.includes('quota') || errorMessage.includes('Quota exceeded')) {
+      const retryMatch = errorMessage.match(/retry in ([\d.]+)s/i);
+      const retrySeconds = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) : null;
+      
+      return {
+        type: 'quota',
+        title: '⏳ Rate Limit Reached',
+        message: retrySeconds 
+          ? `Please wait ${retrySeconds} seconds before trying again, or switch to a different model.`
+          : 'You have reached the rate limit. Please wait a moment or switch to a different model.',
+        retryIn: retrySeconds
+      };
+    }
+    
+    // Check for API key errors
+    if (errorMessage.includes('API key') || errorMessage.includes('VITE_GEMINI_API_KEY')) {
+      return {
+        type: 'auth',
+        title: '🔑 API Key Not Configured',
+        message: 'Please add your Gemini API key in Settings.',
+        retryIn: null
+      };
+    }
+    
+    // Check for invalid API key
+    if (errorMessage.includes('invalid') && errorMessage.includes('key')) {
+      return {
+        type: 'auth',
+        title: '❌ Invalid API Key',
+        message: 'Your API key appears to be invalid. Please check your Settings and update it.',
+        retryIn: null
+      };
+    }
+    
+    // Check for network errors
+    if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+      return {
+        type: 'network',
+        title: '🌐 Network Error',
+        message: 'Unable to connect to Gemini API. Please check your internet connection and try again.',
+        retryIn: null
+      };
+    }
+    
+    // Check for model not found
+    if (errorMessage.includes('model') && errorMessage.includes('not found')) {
+      return {
+        type: 'model',
+        title: '🤖 Model Not Available',
+        message: 'The selected model is not available. Please try a different model.',
+        retryIn: null
+      };
+    }
+    
+    // Generic error
+    return {
+      type: 'error',
+      title: '⚠️ Error',
+      message: errorMessage.length > 200 ? errorMessage.substring(0, 200) + '...' : errorMessage,
+      retryIn: null
+    };
+  };
+
   const handleRun = async () => {
     setLoading(true);
     setOutput('');
+    setError(null);
+    
     try {
       const agentWithModel = { ...agent, model: selectedModel };
       const result = await onRun(agentWithModel, input, customParamValues);
       setOutput(result);
     } catch (error) {
-      const errorMsg = error.message.includes('VITE_GEMINI_API_KEY')
-        ? 'API key not configured. Please add VITE_GEMINI_API_KEY to your .env file.'
-        : `Error: ${error.message}`;
-      setOutput(errorMsg);
+      const parsedError = parseErrorMessage(error.message);
+      setError(parsedError);
     } finally {
       setLoading(false);
     }
@@ -93,10 +159,6 @@ const RunAgentModal = ({ agent, onRun, onClose }) => {
         </div>
 
         <div className="modal-body">
-          {/* <div className="info-badge">
-            <span className="badge">{getModelName(agent.model)}</span>
-          </div> */}
-
           {/* Model Selector */}
           <div className="form-group">
             <label>
@@ -175,7 +237,45 @@ const RunAgentModal = ({ agent, onRun, onClose }) => {
             )}
           </button>
 
-          {output && (
+          {/* Error Display - Replace existing error section with this */}
+      {error && (
+      <div className="error-section">
+        <div className={`error-box ${error.type}`}>
+          {/* <div className="error-icon">
+            {error.type === 'quota' && '⏳'}
+            {error.type === 'auth' && '🔑'}
+            {error.type === 'network' && '🌐'}
+            {error.type === 'model' && '🤖'}
+            {error.type === 'error' && '⚠️'}
+          </div> */}
+      
+      <div className="error-content">
+        <h3 className="error-title">{error.title}</h3>
+        <p className="error-message">{error.message}</p>
+        
+        {error.type === 'quota' && (
+          <div className="error-actions">
+            <div className="suggestion-box">
+              💡 <strong>Suggestion:</strong> Try using a different model to continue working
+            </div>
+          </div>
+        )}
+      </div>
+
+      <button 
+        onClick={() => setError(null)} 
+        className="error-close-btn"
+        title="Dismiss"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
+
+
+          {/* Output Display */}
+          {output && !error && (
             <div className="output-section">
               <div className="output-header">
                 <h3>Output</h3>

@@ -98,16 +98,33 @@ function App() {
     }
   };
 
-  const seedDefaultAgents = async () => {
-    const existingAgents = await getAllAgents();
-    const hasDefaultAgent = existingAgents.some(agent => agent.isDefault);
-    
-    if (!hasDefaultAgent && existingAgents.length === 0) {
-      for (const defaultAgent of DEFAULT_AGENTS) {
-        await saveAgent(defaultAgent);
-      }
+ const seedDefaultAgents = async () => {
+  const existingAgents = await getAllAgents();
+  const existingDefaultAgent = existingAgents.find(agent => agent.isDefault);
+  
+  // Get the latest default agent configuration
+  const latestDefaultAgent = DEFAULT_AGENTS[0];
+  
+  // If default agent exists, UPDATE it with new configuration
+  if (existingDefaultAgent) {
+    console.log('🔄 Updating default agent with latest configuration...');
+    await updateAgent({
+      ...latestDefaultAgent,
+      id: existingDefaultAgent.id, // Keep the same ID
+      isDefault: true
+    });
+    console.log('✅ Default agent updated!');
+  } 
+  // If no default agent exists and no agents at all, CREATE it
+  else if (existingAgents.length === 0) {
+    console.log('🆕 Creating default agent...');
+    for (const defaultAgent of DEFAULT_AGENTS) {
+      await saveAgent(defaultAgent);
     }
-  };
+    console.log('✅ Default agent created!');
+  }
+};
+
 
   const loadAgents = async () => {
     const allAgents = await getAllAgents();
@@ -419,6 +436,10 @@ function App() {
         onToggle={() => setIsChatBotOpen(!isChatBotOpen)}
         onSendMessage={handleChatBotMessage}
         agentName={'AgentForge Assistant'}
+        onImportAgent={async (agent) => {
+          await saveAgent(agent);
+          await loadAgents();
+        }}
       />
 
       {showSettings && (
@@ -436,6 +457,8 @@ function App() {
           existingAgents={agents}
         />
       )}
+
+      
     </div>
   );
 }
