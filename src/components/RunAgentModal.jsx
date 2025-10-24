@@ -6,6 +6,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import CopyButton from './CopyButton';
 import { GEMINI_MODELS, getModelName } from '../constants/models';
+import "./RunAgentModel.css"
 
 const RunAgentModal = ({ agent, onRun, onClose }) => {
   const [input, setInput] = useState('');
