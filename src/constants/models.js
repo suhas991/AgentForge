@@ -57,7 +57,7 @@ export const GEMINI_MODELS = [
 ];
 
 // Default model - using the latest and fastest
-export const DEFAULT_MODEL = "gemini-2.5-flash-live";
+export const DEFAULT_MODEL = "gemini-2.0-flash";
 
 // Get model display name
 export const getModelName = (modelId) => {
