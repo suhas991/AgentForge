@@ -23,7 +23,7 @@ const AgentFormModal = ({ agent, onSave, onClose }) => {
 
         <div className="modal-body">
           <AgentForm
-            agent={agent}
+            initialData={agent}
             onSave={onSave}
             onCancel={onClose}
           />

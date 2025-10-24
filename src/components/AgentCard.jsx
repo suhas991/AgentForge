@@ -1,12 +1,12 @@
 // src/components/AgentCard.jsx
 import React from 'react';
 import { exportAgent } from '../services/exportImportService';
+import { getModelName, getModelCategory } from '../constants/models';
 
 const AgentCard = ({ agent, onEdit, onRun, onDelete, isDefault }) => {
   const getModelBadgeClass = (modelId) => {
-    if (modelId.includes('pro')) return 'model-badge pro';
-    if (modelId.includes('lite')) return 'model-badge lite';
-    return 'model-badge';
+    const category = getModelCategory(modelId);
+    return `model-badge ${category}`;
   };
 
   const handleExport = (e) => {
@@ -36,7 +36,7 @@ const AgentCard = ({ agent, onEdit, onRun, onDelete, isDefault }) => {
             <span className="role-subtitle">{agent.role}</span>
           </div>
           <span className={getModelBadgeClass(agent.model)}>
-            {agent.model}
+            {getModelName(agent.model)}
           </span>
         </div>
       </div>
@@ -81,18 +81,7 @@ const AgentCard = ({ agent, onEdit, onRun, onDelete, isDefault }) => {
           </svg>
           {isDefault ? 'Use Helper' : 'Run'}
         </button>
-        
-        {!isDefault && (
-          <button onClick={() => onDelete(agent.id)} className="btn-card btn-delete">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-            Delete
-          </button>
-        )}
 
-        {/* ADD EXPORT BUTTON HERE - Only for non-default agents */}
         {!isDefault && (
           <button onClick={handleExport} className="btn-card btn-export" title="Export agent">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -101,6 +90,16 @@ const AgentCard = ({ agent, onEdit, onRun, onDelete, isDefault }) => {
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
             Export
+          </button>
+        )}
+        
+        {!isDefault && (
+          <button onClick={() => onDelete(agent.id)} className="btn-card btn-delete">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Delete
           </button>
         )}
       </div>
