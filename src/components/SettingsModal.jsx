@@ -1,7 +1,9 @@
 // src/components/SettingsModal.jsx
 import React, { useState } from 'react';
+import { useAppStore } from '../store/appStore';
 
 const SettingsModal = ({ onClose, currentConfig, onSave }) => {
+  const { setUserConfig } = useAppStore();
   const [apiKey, setApiKey] = useState(currentConfig?.apiKey || '');
   const [showKey, setShowKey] = useState(false);
 
@@ -11,6 +13,7 @@ const SettingsModal = ({ onClose, currentConfig, onSave }) => {
       apiKey: apiKey
     };
     localStorage.setItem('userConfig', JSON.stringify(updatedConfig));
+    setUserConfig(updatedConfig);
     onSave(updatedConfig);
     onClose();
   };

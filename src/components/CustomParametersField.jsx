@@ -1,7 +1,7 @@
 // src/components/CustomParametersField.jsx
 import React from 'react';
 
-const CustomParametersField = ({ parameters, onChange }) => {
+const CustomParametersField = ({ parameters, onChange, disabled = false }) => {
   const addParameter = () => {
     onChange([...parameters, { key: '', value: '', type: 'text' }]);
   };
@@ -31,12 +31,14 @@ const CustomParametersField = ({ parameters, onChange }) => {
             value={param.key}
             onChange={(e) => updateParameter(index, 'key', e.target.value)}
             className="param-key"
+            disabled={disabled}
           />
           
           <select
             value={param.type}
             onChange={(e) => updateParameter(index, 'type', e.target.value)}
             className="param-type"
+            disabled={disabled}
           >
             <option value="text">Text</option>
             <option value="number">Number</option>
@@ -50,6 +52,7 @@ const CustomParametersField = ({ parameters, onChange }) => {
               value={param.options || ''}
               onChange={(e) => updateParameter(index, 'options', e.target.value)}
               className="param-value"
+              disabled={disabled}
             />
           ) : (
             <input
@@ -59,6 +62,7 @@ const CustomParametersField = ({ parameters, onChange }) => {
               onChange={(e) => updateParameter(index, 'value', e.target.value)}
               className="param-value"
               step={param.type === 'number' ? '0.1' : undefined}
+              disabled={disabled}
             />
           )}
 
@@ -66,6 +70,7 @@ const CustomParametersField = ({ parameters, onChange }) => {
             type="button"
             onClick={() => removeParameter(index)}
             className="btn-remove"
+            disabled={disabled}
           >
             ✕
           </button>
@@ -76,6 +81,7 @@ const CustomParametersField = ({ parameters, onChange }) => {
         type="button"
         onClick={addParameter}
         className="btn-add-param"
+        disabled={disabled}
       >
         + Add Parameter
       </button>

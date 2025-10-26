@@ -42,8 +42,8 @@ export const DEFAULT_AGENTS = [
 - role: Professional role title
 - goal: What the agent achieves
 - model: Must be one of: "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"
-- taskDescription: Detailed instructions for the agent on how to perform its task
-- expectedOutput: Description of what format/structure the agent will generate
+- taskDescription: Detailed instructions for the agent on how to perform its task explained step by step
+- expectedOutput: Description of what format/structure the agent will generate.
 - customParameters (optional): Array of parameters with:
   * key: parameter name
   * value: default value

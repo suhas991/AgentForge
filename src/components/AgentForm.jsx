@@ -13,6 +13,8 @@ const AgentForm = ({ onSave, initialData = null, onCancel }) => {
     model: initialData?.model || DEFAULT_MODEL,
     customParameters: initialData?.customParameters || []
   });
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,15 +31,24 @@ const AgentForm = ({ onSave, initialData = null, onCancel }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(formData);
+    setIsSaving(true);
+    setError(null);
+    
+    try {
+      await onSave(formData);
+    } catch (err) {
+      console.error('Error saving agent:', err);
+      setError(err.message || 'Failed to save agent');
+      setIsSaving(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="agent-form">
       <div className="form-group">
-        <label>Agent Name *</label>
+        <label>Agent Name </label>
         <input
           type="text"
           name="name"
@@ -45,11 +56,12 @@ const AgentForm = ({ onSave, initialData = null, onCancel }) => {
           onChange={handleChange}
           placeholder="e.g., Content Writer Agent"
           required
+          disabled={isSaving}
         />
       </div>
 
       <div className="form-group">
-        <label>Role *</label>
+        <label>Role </label>
         <input
           type="text"
           name="role"
@@ -57,11 +69,12 @@ const AgentForm = ({ onSave, initialData = null, onCancel }) => {
           onChange={handleChange}
           placeholder="e.g., Professional Content Creator"
           required
+          disabled={isSaving}
         />
       </div>
 
       <div className="form-group">
-        <label>Goal *</label>
+        <label>Goal </label>
         <textarea
           name="goal"
           value={formData.goal}
@@ -69,11 +82,12 @@ const AgentForm = ({ onSave, initialData = null, onCancel }) => {
           placeholder="What should this agent achieve?"
           rows="2"
           required
+          disabled={isSaving}
         />
       </div>
 
       <div className="form-group">
-        <label>Task Description *</label>
+        <label>Task Description </label>
         <textarea
           name="taskDescription"
           value={formData.taskDescription}
@@ -81,11 +95,12 @@ const AgentForm = ({ onSave, initialData = null, onCancel }) => {
           placeholder="Describe the tasks this agent will perform..."
           rows="4"
           required
+          disabled={isSaving}
         />
       </div>
 
       <div className="form-group">
-        <label>Expected Output *</label>
+        <label>Expected Output </label>
         <textarea
           name="expectedOutput"
           value={formData.expectedOutput}
@@ -93,16 +108,18 @@ const AgentForm = ({ onSave, initialData = null, onCancel }) => {
           placeholder="Describe the format and structure of the expected output..."
           rows="3"
           required
+          disabled={isSaving}
         />
       </div>
 
       <div className="form-group">
-        <label>Model *</label>
+        <label>Model </label>
         <select
           name="model"
           value={formData.model}
           onChange={handleChange}
           required
+          disabled={isSaving}
         >
           {GEMINI_MODELS.map(model => (
             <option key={model.id} value={model.id}>
@@ -117,15 +134,29 @@ const AgentForm = ({ onSave, initialData = null, onCancel }) => {
         <CustomParametersField
           parameters={formData.customParameters}
           onChange={handleCustomParametersChange}
+          disabled={isSaving}
         />
       </div>
 
+      {error && (
+        <div className="form-error" style={{
+          padding: '12px',
+          backgroundColor: '#fee',
+          color: '#c33',
+          borderRadius: '4px',
+          marginBottom: '16px',
+          fontSize: '14px'
+        }}>
+          {error}
+        </div>
+      )}
+
       <div className="form-actions">
-        <button type="button" onClick={onCancel} className="btn-secondary">
+        <button type="button" onClick={onCancel} className="btn-secondary" disabled={isSaving}>
           Cancel
         </button>
-        <button type="submit" className="btn-primary">
-          {initialData ? 'Update Agent' : 'Create Agent'}
+        <button type="submit" className="btn-primary" disabled={isSaving}>
+          {isSaving ? 'Saving...' : (initialData ? 'Update Agent' : 'Create Agent')}
         </button>
       </div>
     </form>
