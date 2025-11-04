@@ -1,0 +1,599 @@
+/* ==================== WORKFLOW BUILDER ==================== */
+
+.workflow-builder {
+  max-width: 1100px;
+  width: 92vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.workflow-builder h2 {
+  margin: 0 0 6px 0;
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.workflow-builder .modal-subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.workflow-builder .form-group {
+  margin-bottom: 20px;
+  padding: 0 24px;
+}
+
+.workflow-builder .form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.workflow-builder .form-group input,
+.workflow-builder .form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--surface);
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.workflow-builder .form-group input:focus,
+.workflow-builder .form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.workflow-builder .form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+}
+
+/* ==================== BUILDER LAYOUT ==================== */
+
+.builder-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 24px 0;
+  padding: 0 24px;
+  min-height: 400px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.available-agents,
+.workflow-sequence {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.available-agents {
+  border-left: 3px solid var(--primary);
+}
+
+.workflow-sequence {
+  border-left: 3px solid #a855f7;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-header h3 svg {
+  opacity: 0.6;
+  width: 16px;
+  height: 16px;
+}
+
+.section-caption {
+  padding: 4px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* ==================== SEARCH BOX ==================== */
+
+.search-box {
+  position: relative;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.search-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.search-box svg {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.search-box input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.search-box input::placeholder {
+  color: var(--text-secondary);
+}
+
+.clear-search {
+  padding: 4px;
+  background: var(--background);
+  border: none;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  transition: all 0.2s;
+  font-size: 12px;
+}
+
+.clear-search:hover {
+  background: var(--danger);
+  color: white;
+}
+
+/* ==================== AGENT LIST ==================== */
+
+.agent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding-right: 4px;
+  flex: 1;
+}
+
+.agent-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.agent-item:hover {
+  background: var(--surface);
+  border-color: var(--primary);
+  transform: translateX(2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.agent-item.added {
+  background: rgba(99, 102, 241, 0.05);
+  border-color: var(--primary);
+}
+
+.agent-item .add-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.agent-item:hover .add-icon {
+  transform: scale(1.1);
+}
+
+.agent-item.added .add-icon {
+  background: var(--success);
+}
+
+.agent-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.agent-item strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agent-item small {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.no-results {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 40px 20px;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* ==================== WORKFLOW CHAIN ==================== */
+
+.chain-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding-right: 4px;
+  flex: 1;
+}
+
+.chain-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: all 0.2s;
+  cursor: move;
+}
+
+.chain-item:focus {
+  /* outline: 2px solid var(--primary); */
+  outline-offset: 2px;
+}
+
+.chain-item:hover {
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.chain-item.dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+  box-shadow: var(--shadow-lg);
+}
+
+.drag-handle {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: grab;
+  border-radius: 4px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.drag-handle:hover {
+  background: var(--background);
+  color: var(--primary);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.chain-number {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.chain-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chain-info strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chain-info small {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chain-controls {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.chain-controls button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.chain-controls button:hover:not(:disabled) {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.chain-controls button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.chain-controls .remove-btn:hover:not(:disabled) {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.empty-chain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 280px;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 40px 20px;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.empty-chain svg {
+  opacity: 0.3;
+  color: var(--text-secondary);
+}
+
+.empty-chain p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.empty-chain small {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* ==================== FORM ACTIONS ==================== */
+
+.workflow-builder .form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 20px 24px;
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+
+.workflow-builder .form-actions button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.workflow-builder .form-actions .btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.workflow-builder .form-actions .btn-secondary:hover {
+  background: var(--background);
+  border-color: var(--text-secondary);
+}
+
+.workflow-builder .form-actions .btn-primary {
+  background: var(--primary);
+  border: none;
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.workflow-builder .form-actions .btn-primary:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.workflow-builder .form-actions .btn-primary:disabled {
+  background: var(--border);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ==================== SCROLLBARS ==================== */
+
+.agent-list::-webkit-scrollbar,
+.chain-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.agent-list::-webkit-scrollbar-track,
+.chain-list::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.agent-list::-webkit-scrollbar-thumb,
+.chain-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.agent-list::-webkit-scrollbar-thumb:hover,
+.chain-list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 1024px) {
+  .builder-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .workflow-builder {
+    max-width: 95vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .workflow-builder {
+    max-height: none;
+    width: 95vw;
+  }
+
+  .modal-header-section {
+    padding: 20px 20px 16px;
+  }
+
+  .workflow-builder h2 {
+    font-size: 20px;
+  }
+
+  .workflow-builder .form-group,
+  .builder-layout {
+    padding: 0 20px;
+  }
+
+  .builder-layout {
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .available-agents,
+  .workflow-sequence {
+    padding: 16px;
+  }
+
+  .workflow-builder .form-actions {
+    flex-direction: column-reverse;
+    padding: 16px 20px;
+  }
+
+  .workflow-builder .form-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}

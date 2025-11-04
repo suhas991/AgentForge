@@ -2,6 +2,7 @@
   /* padding: 40px 0; */
   /* max-width: 1050px; */
   margin: 0 auto;
+  margin: 0px 42px;
 }
 
 .history-page h2 {
@@ -11,6 +12,38 @@
   margin-bottom: 2rem;
   letter-spacing: -1.5px;
   text-align: left;
+}
+
+.history-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e5e8f1;
+}
+
+.history-tabs .tab {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #454a69;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  bottom: -2px;
+}
+
+.history-tabs .tab:hover {
+  color: #3265f0;
+  background: #f6f6fa;
+}
+
+.history-tabs .tab.active {
+  color: #3265f0;
+  border-bottom-color: #3265f0;
+  background: #f0f4fc;
 }
 
 .history-page table {
@@ -174,6 +207,25 @@
   user-select: none;
   font-size: 14px;
   padding: 4px 0;
+  list-style: none;
+  position: relative;
+  padding-left: 18px;
+}
+
+.history-page details summary::-webkit-details-marker {
+  display: none;
+}
+
+.history-page details summary::before {
+  content: '▶';
+  position: absolute;
+  left: 0;
+  font-size: 15px;
+  transition: transform 0.2s;
+}
+
+.history-page details[open] summary::before {
+  transform: rotate(90deg);
 }
 
 .history-page details summary:hover {
@@ -206,4 +258,84 @@
   color: #666;
   text-align: center;
   padding: 40px;
+}
+
+.workflow-steps {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  max-width: 400px;
+}
+
+.step-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border: 1px solid #e5e8f1;
+}
+
+.step-detail:last-child {
+  margin-bottom: 0;
+}
+
+.step-detail strong {
+  font-size: 14px;
+  color: #282a36;
+}
+
+.step-detail .status-success,
+.step-detail .status-error {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.step-detail .status-success {
+  background: #d1fae5;
+}
+
+.step-detail .status-error {
+  background: #fee;
+}
+
+.error-text {
+  color: #d33;
+  font-size: 13px;
+  margin-top: 6px;
+  padding: 8px;
+  background: #fee;
+  border-radius: 4px;
+}
+
+.markdown-content {
+  background: #f4f7fb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  max-width: 500px;
+}
+
+.markdown-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.markdown-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.markdown-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.markdown-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

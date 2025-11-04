@@ -136,3 +136,105 @@ export const generateUniqueName = (baseName, existingNames) => {
 
   return name;
 };
+
+/**
+ * Export a single workflow to JSON file
+ */
+export const exportWorkflow = (workflow) => {
+  const exportData = {
+    version: '1.0',
+    exportDate: new Date().toISOString(),
+    type: 'workflow',
+    workflow: sanitizeWorkflow(workflow)
+  };
+
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
+    type: 'application/json' 
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${workflow.name.replace(/\s+/g, '-').toLowerCase()}-workflow.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+/**
+ * Remove internal fields before workflow export
+ */
+const sanitizeWorkflow = (workflow) => {
+  const { id, createdAt, updatedAt, ...cleanWorkflow } = workflow;
+  return {
+    ...cleanWorkflow,
+    exportedAt: new Date().toISOString()
+  };
+};
+
+/**
+ * Validate imported workflow JSON structure
+ */
+export const validateWorkflowImportData = (data) => {
+  try {
+    if (!data || typeof data !== 'object') {
+      return { valid: false, error: 'Invalid JSON structure' };
+    }
+
+    // Check for version
+    if (!data.version) {
+      return { valid: false, error: 'Missing version information' };
+    }
+
+    // Check for workflow type
+    if (data.type !== 'workflow') {
+      return { valid: false, error: 'Invalid file type. Expected workflow export.' };
+    }
+
+    // Check for workflow data
+    if (!data.workflow || typeof data.workflow !== 'object') {
+      return { valid: false, error: 'Missing or invalid workflow data' };
+    }
+
+    // Validate workflow fields
+    const workflow = data.workflow;
+    if (!workflow.name || !workflow.agents || !Array.isArray(workflow.agents)) {
+      return { valid: false, error: 'Workflow missing required fields (name, agents array)' };
+    }
+
+    return { valid: true, data: workflow };
+  } catch (error) {
+    return { valid: false, error: error.message };
+  }
+};
+
+/**
+ * Parse and import workflow from file
+ */
+export const importWorkflowFromFile = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      try {
+        const jsonData = JSON.parse(event.target.result);
+        const validation = validateWorkflowImportData(jsonData);
+        
+        if (!validation.valid) {
+          reject(new Error(validation.error));
+          return;
+        }
+
+        resolve(validation.data);
+      } catch (error) {
+        reject(new Error('Failed to parse JSON file'));
+      }
+    };
+
+    reader.onerror = () => {
+      reject(new Error('Failed to read file'));
+    };
+
+    reader.readAsText(file);
+  });
+};
