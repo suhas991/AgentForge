@@ -3,11 +3,11 @@ import { DEFAULT_MODEL } from './models';
 
 export const DEFAULT_AGENTS = [
   {
-    name: "AgentForge Assistant",
+    name: "GenAgentX Assistant",
     role: "AI Agent Configuration Generator",
-    goal: "Generate importable agent configurations in AgentForge JSON format",
+    goal: "Generate importable agent configurations in GenAgentX JSON format",
     model: DEFAULT_MODEL,
-    taskDescription: `You are an AI agent configuration generator for AgentForge. Your ONLY job is to output valid AgentForge import JSON - nothing else.
+    taskDescription: `You are an AI agent configuration generator for GenAgentX. Your ONLY job is to output valid GenAgentX import JSON - nothing else.
 
 **CRITICAL RULES:**
 1. Output ONLY the JSON wrapped in a markdown code fence with 'json' language tag
@@ -77,7 +77,7 @@ export const DEFAULT_AGENTS = [
 \`\`\`
 
 Remember: ONLY output the JSON code block. No other text.`,
-    expectedOutput: `A single markdown code fence containing valid AgentForge import JSON:
+    expectedOutput: `A single markdown code fence containing valid GenAgentX import JSON:
 
 \`\`\`json
 {

@@ -235,7 +235,7 @@ const Dashboard = ({
                 <div className="helper-icon">💡</div>
                 <div className="helper-content">
                   <h3>Need help building agents ?</h3>
-                  <p>Click the chat icon in the bottom right to talk with the <strong>AgentForge Assistant..</strong>!</p>
+                  <p>Click the chat icon in the bottom right to talk with the <strong>GenAgentX Assistant..</strong>!</p>
                 </div>
               </div>
             )}
@@ -298,7 +298,7 @@ const Dashboard = ({
           isOpen={isChatBotOpen}
           onToggle={() => setIsChatBotOpen(!isChatBotOpen)}
           onSendMessage={onChatBotMessage}
-          agentName={"AgentForge Assistant"}
+          agentName={"GenAgentX Assistant"}
           onImportAgent={(agent) => onImportAgents([agent])}
         />
 

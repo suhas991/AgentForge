@@ -6,7 +6,7 @@ const MobileBlocker = () => {
       <div className="mobile-blocker-content">
         <div className="blocker-icon">🖥️</div>
         <h1>Desktop Only</h1>
-        <p>AgentForge is optimized for desktop and laptop devices.</p>
+        <p>GenAgentX is optimized for desktop and laptop devices.</p>
         <p className="blocker-subtext">
           Please open this application on a desktop or laptop computer with a minimum screen width of 1024px for the best experience.
         </p>

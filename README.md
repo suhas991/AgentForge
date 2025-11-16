@@ -1,7 +1,7 @@
 <div align="center">
-  <img width="80" height="80" alt="AgentForge Logo" src="https://github.com/user-attachments/assets/0db914dc-c237-45ae-8c72-169d6a76a45f" />
+  <img width="80" height="80" alt="GenAgentX Logo" src="https://github.com/user-attachments/assets/0db914dc-c237-45ae-8c72-169d6a76a45f" />
   
-  <h1>AgentForge</h1>
+  <h1>GenAgentX</h1>
   <p><strong>Build Intelligent AI Agents — No Code Required</strong></p>
 
   <p>
@@ -15,7 +15,7 @@
     Design AI tools, assistants, and workflows — all within your browser.</em>
   </p>
 
-  <a href="https://suhas991.github.io/AgentForge/"><b>Start Building Now →</b></a>
+  <a href="https://suhas991.github.io/GenAgentX/"><b>Start Building Now →</b></a>
 </div>
 
 ---
@@ -72,10 +72,10 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/suhas991/AgentForge.git
+git clone https://github.com/suhas991/GenAgentX.git
 
 # Navigate to the project directory
-cd AgentForge
+cd GenAgentX
 
 # Install dependencies
 npm install
@@ -84,7 +84,7 @@ npm install
 npm run dev
 ```
 
-Then open **http://localhost:5173/** in your browser to access **AgentForge**.
+Then open **http://localhost:5173/** in your browser to access **GenAgentX**.
 
 ---
 
@@ -156,9 +156,9 @@ copies of the Software.
 
 ## 🌟 **Show Your Support**
 
-If you find **AgentForge** helpful:
+If you find **GenAgentX** helpful:
 - ⭐ Star the repo  
 - 🐦 Share it on Twitter / LinkedIn  
 - 🧠 Build and showcase your own agents!  
 
-> “AgentForge empowers creators and developers to turn AI ideas into reality — visually, instantly, and securely.”
+> "GenAgentX empowers creators and developers to turn AI ideas into reality — visually, instantly, and securely."

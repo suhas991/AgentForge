@@ -12,8 +12,8 @@ const Sidebar = ({ activeView, onViewChange }) => {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <img src={logo} alt="AgentForge" className="sidebar-logo" />
-        <h3>AgentForge</h3>
+        <img src={logo} alt="GenAgentX" className="sidebar-logo" />
+        <h3>GenAgentX</h3>
       </div>
 
       <nav className="sidebar-nav">

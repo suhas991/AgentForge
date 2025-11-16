@@ -235,7 +235,7 @@ function App() {
       <div className="app">
         <div className="loading-state">
           <div className="spinner"></div>
-          <p>Initializing AgentForge...</p>
+          <p>Initializing GenAgentX...</p>
         </div>
       </div>
     );

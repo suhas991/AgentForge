@@ -12,8 +12,8 @@ const ChatBot = ({
 }) => {
   const [messages, setMessages] = useState([
     {
-      role: "assistant",
-      content: `Hi! 👋 I'm the **AgentForge Assistant**.
+      role: 'assistant',
+      content: `Hi! 👋 I'm the **GenAgentX Assistant**.
 
 I can help you create well-structured AI agents. Just describe what you want!
 
@@ -67,7 +67,8 @@ I can help you create well-structured AI agents. Just describe what you want!
         parsed.agents.length > 0
       ) {
         if (isAgentObject(parsed.agents[0])) {
-          console.log("✅ Valid AgentForge export detected");
+          console.log("✅ Valid GenAgentX export detected");
+          // Show success message
           return { valid: true, data: parsed };
         } else {
           console.log("❌ Agents array present but missing required agent fields");
@@ -202,7 +203,7 @@ How can I help you build an agent today?`,
       <button
         className={`chatbot-toggle ${isOpen ? "open" : ""}`}
         onClick={onToggle}
-        title="AgentForge Assistant"
+        title="GenAgentX Assistant"
       >
         {isOpen ? (
           <svg
@@ -228,7 +229,7 @@ How can I help you build an agent today?`,
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
           </svg>
         )}
-        {!isOpen && <span className="chatbot-badge">AgentForge Helper</span>}
+        {!isOpen && <span className="chatbot-badge">GenAgentX Helper</span>}
       </button>
 
       <div className={`chatbot-sidebar ${isOpen ? "open" : ""}`}>
