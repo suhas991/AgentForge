@@ -1,5 +1,5 @@
 // src/components/LandingPage.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
@@ -10,12 +10,21 @@ import {
   FaLock, FaRobot, FaCogs, FaChartBar, FaUsers,
   FaHandshake, FaPen, FaCode, FaGraduationCap, FaChartPie,
   FaHeadset, FaTheaterMasks, FaPlay, FaCheckCircle, FaArrowRight,
-  FaShieldAlt, FaStar
+  FaShieldAlt, FaStar, FaMoon, FaSun
 } from 'react-icons/fa';
 import './LandingPage.css';
 import logo from '/vite.png';
 
 const LandingPage = ({ onGetStarted }) => {
+  const [theme, setTheme] = useState('dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
+  };
   // Animation variants
   const fadeInUp = {
     initial: { opacity: 0, y: 60 },
@@ -84,14 +93,25 @@ const LandingPage = ({ onGetStarted }) => {
             <img src={logo} alt="GenAgentX" />
             <span>GenAgentX</span>
           </motion.div>
-          <motion.button 
-            className="nav-cta" 
-            onClick={onGetStarted}
-            whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(99, 102, 241, 0.5)" }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Try It Free
-          </motion.button>
+          <div className="nav-actions">
+            <motion.button 
+              className="theme-toggle" 
+              onClick={toggleTheme}
+              whileHover={{ scale: 1.1, rotate: 15 }}
+              whileTap={{ scale: 0.9 }}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? <FaSun /> : <FaMoon />}
+            </motion.button>
+            <motion.button 
+              className="nav-cta" 
+              onClick={onGetStarted}
+              whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(99, 102, 241, 0.5)" }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Try It Free
+            </motion.button>
+          </div>
         </motion.nav>
 
         <div className="hero-content">
