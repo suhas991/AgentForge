@@ -72,6 +72,25 @@ export const executeAgent = async (agent, userInput, customParams) => {
     }
 
     const data = await response.json();
+    
+    // Check if response has expected structure
+    if (!data.candidates || data.candidates.length === 0) {
+      console.error('Unexpected API response:', data);
+      
+      // Check for safety ratings or prompt blocking
+      if (data.promptFeedback?.blockReason) {
+        throw new Error(`Content blocked: ${data.promptFeedback.blockReason}`);
+      }
+      
+      throw new Error('API returned no candidates. The content may have been blocked or the response was empty.');
+    }
+    
+    // Check if candidate has content
+    if (!data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
+      console.error('Candidate missing content:', data.candidates[0]);
+      throw new Error('API response missing content. This may be due to safety filters.');
+    }
+    
     return data.candidates[0].content.parts[0].text;
   } catch (error) {
     console.error('Gemini API Error:', error);

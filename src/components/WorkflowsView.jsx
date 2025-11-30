@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { getAllWorkflows, deleteWorkflow } from '../services/indexedDB';
 import WorkflowCard from './WorkflowCard';
+import NotificationModal from './NotificationModal';
+import { useNotification } from '../hooks/useNotification';
 import './WorkflowsView.css';
 
 const WorkflowsView = ({ agents, onBuildWorkflow, onEditWorkflow, onRunWorkflow }) => {
   const [workflows, setWorkflows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [runningWorkflowId, setRunningWorkflowId] = useState(null);
+  
+  const {
+    notification,
+    closeNotification,
+    showConfirm,
+  } = useNotification();
 
   useEffect(() => {
     loadWorkflows();
@@ -26,7 +34,13 @@ const WorkflowsView = ({ agents, onBuildWorkflow, onEditWorkflow, onRunWorkflow 
   };
 
   const handleDelete = async (id) => {
-    if (confirm('Delete this workflow?')) {
+    const confirmed = await showConfirm(
+      'Are you sure you want to delete this workflow? This action cannot be undone.',
+      'Delete Workflow',
+      { type: 'warning', confirmText: 'Delete', cancelText: 'Cancel' }
+    );
+    
+    if (confirmed) {
       await deleteWorkflow(id);
       loadWorkflows();
     }
@@ -56,23 +70,36 @@ const WorkflowsView = ({ agents, onBuildWorkflow, onEditWorkflow, onRunWorkflow 
   }
 
   return (
-    <div className="workflows-view">
-      {workflows.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">⚡</div>
-          <h3>No Workflows Yet</h3>
-          <p>Create your first agent workflow to automate complex tasks</p>
-          <button className="btn-primary" onClick={onBuildWorkflow}>
-            Build Your First Workflow
-          </button>
-        </div>
-      ) : (
-        <div className="workflows-grid">
-          {workflows.map(workflow => (
-            <WorkflowCard
-              key={workflow.id}
-              workflow={workflow}
-              agents={agents}
+    <>
+      <NotificationModal
+        isOpen={notification.isOpen}
+        onClose={closeNotification}
+        onConfirm={notification.onConfirm}
+        title={notification.title}
+        message={notification.message}
+        type={notification.type}
+        confirmText={notification.confirmText}
+        cancelText={notification.cancelText}
+        showCancel={notification.showCancel}
+      />
+      
+      <div className="workflows-view">
+        {workflows.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">⚡</div>
+            <h3>No Workflows Yet</h3>
+            <p>Create your first agent workflow to automate complex tasks</p>
+            <button className="btn-primary" onClick={onBuildWorkflow}>
+              Build Your First Workflow
+            </button>
+          </div>
+        ) : (
+          <div className="workflows-grid">
+            {workflows.map(workflow => (
+              <WorkflowCard
+                key={workflow.id}
+                workflow={workflow}
+                agents={agents}
               isRunning={runningWorkflowId === workflow.id}
               onRun={() => handleRunWorkflow(workflow)}
               onEdit={handleEdit}
@@ -81,7 +108,8 @@ const WorkflowsView = ({ agents, onBuildWorkflow, onEditWorkflow, onRunWorkflow 
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

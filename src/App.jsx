@@ -5,12 +5,15 @@ import { useAppStore } from './store/appStore';
 import Dashboard from './pages/Dashboard';
 import Landing from './pages/Landing';
 import MobileBlocker from './components/MobileBlocker';
+import NotificationModal from './components/NotificationModal';
+import { useNotification } from './hooks/useNotification';
 import {
   initDB,
   saveAgent,
   updateAgent,
   getAllAgents,
   deleteAgent,
+  getWorkflowsUsingAgent,
 } from './services/indexedDB';
 import { executeAgent } from './services/llmService';
 import { exportAgents } from './services/exportImportService';
@@ -20,6 +23,15 @@ import ExecutionHistory from './components/ExecutionHistory';
 
 function App() {
   const navigate = useNavigate();
+  const {
+    notification,
+    closeNotification,
+    showAlert,
+    showConfirm,
+    showWarning,
+    showError,
+  } = useNotification();
+  
   const {
     agents,
     setAgents,
@@ -147,8 +159,14 @@ function App() {
     navigate('/dashboard');
   };
 
-  const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout? This will clear your configuration.')) {
+  const handleLogout = async () => {
+    const confirmed = await showConfirm(
+      'Are you sure you want to logout? This will clear your configuration.',
+      'Logout',
+      { type: 'warning', confirmText: 'Logout', cancelText: 'Cancel' }
+    );
+    
+    if (confirmed) {
       localStorage.removeItem('userConfig');
       setUserConfig(null);
       setAgents([]);
@@ -177,7 +195,10 @@ function App() {
 
   const handleEditAgent = (agent) => {
     if (agent.isDefault) {
-      alert('Default agents cannot be edited. You can use the chatbot to get help building new agents.');
+      showWarning(
+        'Default agents cannot be edited. You can use the chatbot to get help building new agents.',
+        'Cannot Edit Default Agent'
+      );
       return;
     }
     setEditingAgent(agent);
@@ -186,11 +207,29 @@ function App() {
 
   const handleDeleteAgent = async (id, isDefault) => {
     if (isDefault) {
-      alert('Default agents cannot be deleted.');
+      await showWarning('Default agents cannot be deleted.', 'Cannot Delete Default Agent');
       return;
     }
 
-    if (window.confirm('Are you sure you want to delete this agent?')) {
+    // Check if agent is used in any workflows
+    const workflowsUsingAgent = await getWorkflowsUsingAgent(id);
+    
+    if (workflowsUsingAgent.length > 0) {
+      const workflowNames = workflowsUsingAgent.map(w => w.name).join(', ');
+      await showError(
+        `This agent is used in the following workflow(s):\n${workflowNames}\n\nPlease delete or update the workflow(s) first before deleting this agent.`,
+        'Cannot Delete Agent'
+      );
+      return;
+    }
+
+    const confirmed = await showConfirm(
+      'Are you sure you want to delete this agent? This action cannot be undone.',
+      'Delete Agent',
+      { type: 'warning', confirmText: 'Delete', cancelText: 'Cancel' }
+    );
+    
+    if (confirmed) {
       await deleteAgent(id);
       await loadAgents();
     }
@@ -218,7 +257,7 @@ function App() {
   const handleExportAll = () => {
     const exportableAgents = agents.filter(agent => !agent.isDefault);
     if (exportableAgents.length === 0) {
-      alert('No agents to export');
+      showWarning('No custom agents available to export.', 'No Agents to Export');
       return;
     }
     exportAgents(exportableAgents);
@@ -242,36 +281,50 @@ function App() {
   }
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          userConfig ? <Navigate to="/dashboard" replace /> : <Landing />
-        }
+    <>
+      <NotificationModal
+        isOpen={notification.isOpen}
+        onClose={closeNotification}
+        onConfirm={notification.onConfirm}
+        title={notification.title}
+        message={notification.message}
+        type={notification.type}
+        confirmText={notification.confirmText}
+        cancelText={notification.cancelText}
+        showCancel={notification.showCancel}
       />
-      <Route
-        path="/dashboard"
-        element={
-          userConfig ? (
-            <Dashboard
-              onSaveAgent={handleSaveAgent}
-              onEditAgent={handleEditAgent}
-              onDeleteAgent={handleDeleteAgent}
-              onChatBotMessage={handleChatBotMessage}
-              onRunAgent={handleRunAgent}
-              onImportAgents={handleImportAgents}
-              onExportAll={handleExportAll}
-              onLogout={handleLogout}
-            />
-          ) : (
-            <Navigate to="/" replace />
-          )
-        }
-      />
-      <Route path="/history" element={<ExecutionHistory />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
       
-    </Routes>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            userConfig ? <Navigate to="/dashboard" replace /> : <Landing />
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            userConfig ? (
+              <Dashboard
+                onSaveAgent={handleSaveAgent}
+                onEditAgent={handleEditAgent}
+                onDeleteAgent={handleDeleteAgent}
+                onChatBotMessage={handleChatBotMessage}
+                onRunAgent={handleRunAgent}
+                onImportAgents={handleImportAgents}
+                onExportAll={handleExportAll}
+                onLogout={handleLogout}
+              />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route path="/history" element={<ExecutionHistory />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+        
+      </Routes>
+    </>
   );
 }
 

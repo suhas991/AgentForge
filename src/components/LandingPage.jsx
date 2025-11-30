@@ -10,13 +10,13 @@ import {
   FaLock, FaRobot, FaCogs, FaChartBar, FaUsers,
   FaHandshake, FaPen, FaCode, FaGraduationCap, FaChartPie,
   FaHeadset, FaTheaterMasks, FaPlay, FaCheckCircle, FaArrowRight,
-  FaShieldAlt, FaStar, FaMoon, FaSun
+  FaShieldAlt, FaStar, FaMoon, FaSun, FaBook
 } from 'react-icons/fa';
 import './LandingPage.css';
 import logo from '/vite.png';
 
 const LandingPage = ({ onGetStarted }) => {
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -159,16 +159,20 @@ const LandingPage = ({ onGetStarted }) => {
               whileTap={{ scale: 0.95 }}
             >
               <FaPlay />
-              Get Started Free
+              Get Started
             </motion.button>
-            <motion.button 
+            <motion.a 
+              href="https://suhas991.github.io/GenAgentXDocs/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="btn-hero-secondary"
               whileHover={{ scale: 1.05, y: -3 }}
               whileTap={{ scale: 0.95 }}
+              style={{ textDecoration: 'none' }}
             >
-              <FaPlay />
-              Watch Demo
-            </motion.button>
+              <FaBook />
+              Docs
+            </motion.a>
           </motion.div>
           
           <motion.div 

@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm';
 import { executeChain } from '../services/chainExecutor';
 import { saveWorkflowExecutionLog } from '../services/indexedDB';
 import CopyButton from './CopyButton';
+import { downloadOutput } from '../services/downloadService';
 import './WorkflowRunner.css';
 
 const WorkflowRunner = ({ workflow, agents, onRunAgent, onClose }) => {
@@ -15,6 +16,7 @@ const WorkflowRunner = ({ workflow, agents, onRunAgent, onClose }) => {
   const [error, setError] = useState(null);
   const [currentStep, setCurrentStep] = useState(-1);
   const [completedSteps, setCompletedSteps] = useState([]);
+  const [downloadFormat, setDownloadFormat] = useState("markdown");
 
   const handleRun = async () => {
     if (!input.trim()) return;
@@ -312,7 +314,33 @@ const WorkflowRunner = ({ workflow, agents, onRunAgent, onClose }) => {
             <div className="final-result">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <h4 style={{ margin: 0 }}>🎯 Final Output:</h4>
-                <CopyButton text={results.finalOutput} />
+                <div className="output-actions">
+                  <div className="download-group">
+                    <select
+                      value={downloadFormat}
+                      onChange={(e) => setDownloadFormat(e.target.value)}
+                      className="download-format-select"
+                      title="Select download format"
+                    >
+                      <option value="markdown">Markdown</option>
+                      <option value="html">HTML</option>
+                      <option value="pdf">PDF</option>
+                    </select>
+                    <button
+                      onClick={() => downloadOutput(results.finalOutput, downloadFormat, `workflow_${workflow.name.replace(/\s+/g, '_')}`)}
+                      className="btn-download"
+                      title={`Download as ${downloadFormat.toUpperCase()}`}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                      Download
+                    </button>
+                  </div>
+                  <CopyButton text={results.finalOutput} />
+                </div>
               </div>
               <div className="markdown-content">
                 <ReactMarkdown

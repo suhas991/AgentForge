@@ -115,6 +115,14 @@ export const deleteAgent = async (id) => {
   });
 };
 
+// Check if agent is used in any workflows
+export const getWorkflowsUsingAgent = async (agentId) => {
+  const workflows = await getAllWorkflows();
+  return workflows.filter(workflow => 
+    workflow.agents && workflow.agents.some(agent => agent.agentId === agentId)
+  );
+};
+
 
 // ---------- EXECUTION HISTORY ----------
 
