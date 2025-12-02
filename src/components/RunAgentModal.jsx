@@ -5,10 +5,12 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
 import CopyButton from "./CopyButton";
+import RAGManager from "./RAGManager";
 import { GEMINI_MODELS, getModelName } from "../constants/models";
 import "./RunAgentModal.css";
 import { saveExecutionLog } from "../services/indexedDB";
 import { downloadOutput } from "../services/downloadService";
+import { useAppStore } from "../store/appStore";
 
 const RunAgentModal = ({ agent, onRun, onClose }) => {
   const [input, setInput] = useState("");
@@ -18,6 +20,10 @@ const RunAgentModal = ({ agent, onRun, onClose }) => {
   const [selectedModel, setSelectedModel] = useState(agent.model);
   const [error, setError] = useState(null); // Added error state
   const [downloadFormat, setDownloadFormat] = useState("markdown");
+  const [showRAG, setShowRAG] = useState(false);
+  const [ragEnabled, setRagEnabled] = useState(agent.ragEnabled || false);
+  const [ragTopK, setRagTopK] = useState(agent.ragTopK || 3);
+  const updateAgent = useAppStore((state) => state.updateAgent);
 
   React.useEffect(() => {
     const defaults = {};
@@ -110,13 +116,32 @@ const RunAgentModal = ({ agent, onRun, onClose }) => {
     };
   };
 
+  const handleRAGUpdate = async (updatedAgent) => {
+    // Update local state
+    setRagEnabled(updatedAgent.ragEnabled);
+    setRagTopK(updatedAgent.ragTopK);
+    
+    // Persist to store
+    const updatedAgentData = { 
+      ...agent, 
+      ragEnabled: updatedAgent.ragEnabled, 
+      ragTopK: updatedAgent.ragTopK 
+    };
+    await updateAgent(updatedAgentData);
+  };
+
   const handleRun = async () => {
     setLoading(true);
     setOutput("");
     setError(null);
 
     try {
-      const agentWithModel = { ...agent, model: selectedModel };
+      const agentWithModel = { 
+        ...agent, 
+        model: selectedModel,
+        ragEnabled,
+        ragTopK
+      };
       const result = await onRun(agentWithModel, input, customParamValues);
       setOutput(result);
 
@@ -278,6 +303,45 @@ const RunAgentModal = ({ agent, onRun, onClose }) => {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* RAG Settings */}
+          {agent.id && (
+            <div className="rag-runtime-section">
+              <div className="rag-header" onClick={() => setShowRAG(!showRAG)}>
+                <div className="rag-header-left">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                  <span>RAG Knowledge Base</span>
+                  {ragEnabled && <span className="rag-badge">Enabled</span>}
+                </div>
+                <svg 
+                  width="16" 
+                  height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2"
+                  style={{ transform: showRAG ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+              
+              {showRAG && (
+                <div className="rag-content">
+                  <RAGManager 
+                    agent={{ ...agent, ragEnabled, ragTopK }} 
+                    onUpdate={handleRAGUpdate} 
+                  />
+                </div>
+              )}
             </div>
           )}
 

@@ -1,5 +1,7 @@
 // src/services/llmService.js
 
+import { searchSimilarDocuments } from './vectorStore';
+
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
 // Get API key from user config (localStorage) first, fallback to env
@@ -44,7 +46,25 @@ export const executeAgent = async (agent, userInput, customParams) => {
     const model = agent.model;
     const url = `${GEMINI_API_BASE}/models/${model}:generateContent?key=${apiKey}`;
     
-    const fullPrompt = `${systemPrompt}\n\n---\n\nInput:\n${userInput}`;
+    // Get relevant documents if RAG is enabled
+    let context = '';
+    if (agent.ragEnabled) {
+      const relevantDocs = await searchSimilarDocuments(
+        agent.id, 
+        userInput, 
+        apiKey, 
+        agent.ragTopK || 3
+      );
+      
+      if (relevantDocs.length > 0) {
+        context = '\n\nRelevant Context:\n' + 
+          relevantDocs.map((doc, i) => 
+            `[Document ${i + 1}] ${doc.content}`
+          ).join('\n\n');
+      }
+    }
+    
+    const fullPrompt = `${systemPrompt}\n\n---\n\nInput:\n${userInput}${context}`;
     
     const requestBody = {
       contents: [{

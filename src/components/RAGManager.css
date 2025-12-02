@@ -1,0 +1,201 @@
+.rag-manager {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.rag-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.rag-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+.rag-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.rag-toggle input[type="checkbox"] {
+  display: none;
+}
+
+.toggle-slider {
+  position: relative;
+  width: 50px;
+  height: 26px;
+  background: #ccc;
+  border-radius: 13px;
+  transition: background 0.3s;
+}
+
+.rag-toggle input:checked + .toggle-slider {
+  background: var(--accent-primary);
+}
+
+.toggle-slider::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.rag-toggle input:checked + .toggle-slider::after {
+  transform: translateX(24px);
+}
+
+.toggle-label {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.rag-upload-section {
+  margin: 20px 0;
+}
+
+.upload-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--accent-primary);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.upload-button:hover {
+  background: var(--accent-secondary);
+  transform: translateY(-2px);
+}
+
+.supported-formats {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.upload-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.rag-documents-list h4 {
+  margin: 20px 0 12px;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.rag-documents-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.document-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.document-item:hover {
+  background: var(--bg-hover);
+}
+
+.document-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.document-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.document-meta {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.delete-doc-btn {
+  padding: 8px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-doc-btn:hover {
+  background: #cc0000;
+  transform: scale(1.1);
+}
+
+.no-documents {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 20px;
+  font-style: italic;
+}
+
+.rag-settings {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.rag-settings label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.rag-settings input[type="number"] {
+  width: 80px;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}

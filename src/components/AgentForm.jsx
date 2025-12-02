@@ -1,6 +1,7 @@
 // src/components/AgentForm.jsx
 import React, { useState } from 'react';
 import CustomParametersField from './CustomParametersField';
+import RAGManager from './RAGManager';
 import { GEMINI_MODELS, DEFAULT_MODEL } from '../constants/models';
 
 const AgentForm = ({ onSave, initialData = null, onCancel }) => {
@@ -11,7 +12,10 @@ const AgentForm = ({ onSave, initialData = null, onCancel }) => {
     taskDescription: initialData?.taskDescription || '',
     expectedOutput: initialData?.expectedOutput || '',
     model: initialData?.model || DEFAULT_MODEL,
-    customParameters: initialData?.customParameters || []
+    customParameters: initialData?.customParameters || [],
+    ragEnabled: initialData?.ragEnabled || false,
+    ragTopK: initialData?.ragTopK || 3,
+    id: initialData?.id || null
   });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -28,6 +32,14 @@ const AgentForm = ({ onSave, initialData = null, onCancel }) => {
     setFormData(prev => ({
       ...prev,
       customParameters: params
+    }));
+  };
+
+  const handleRAGUpdate = (updatedAgent) => {
+    setFormData(prev => ({
+      ...prev,
+      ragEnabled: updatedAgent.ragEnabled,
+      ragTopK: updatedAgent.ragTopK
     }));
   };
 
@@ -137,6 +149,14 @@ const AgentForm = ({ onSave, initialData = null, onCancel }) => {
           disabled={isSaving}
         />
       </div>
+
+      {/* RAG Manager - Only show for existing agents with an ID */}
+      {formData.id && (
+        <RAGManager 
+          agent={formData} 
+          onUpdate={handleRAGUpdate}
+        />
+      )}
 
       {error && (
         <div className="form-error" style={{
