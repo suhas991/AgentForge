@@ -32,6 +32,11 @@ const getApiKey = () => {
 };
 
 export const executeAgent = async (agent, userInput, customParams) => {
+  // Fast-fail if the browser reports we're offline.
+  if (typeof navigator !== 'undefined' && navigator && navigator.onLine === false) {
+    throw new Error('No internet connection (offline). Please reconnect and try again.');
+  }
+
   const systemPrompt = buildSystemPrompt(agent, customParams);
   const geminiParams = extractGeminiParameters(customParams);
   
@@ -42,7 +47,7 @@ export const executeAgent = async (agent, userInput, customParams) => {
   }
 
   try {
-    // Use the model from agent, fallback to gemini-2.0-flash
+    // Use the model from agent (default configured in constants)
     const model = agent.model;
     const url = `${GEMINI_API_BASE}/models/${model}:generateContent?key=${apiKey}`;
     
@@ -114,6 +119,18 @@ export const executeAgent = async (agent, userInput, customParams) => {
     return data.candidates[0].content.parts[0].text;
   } catch (error) {
     console.error('Gemini API Error:', error);
+
+    // Browser/network failures often surface as a generic TypeError: "Failed to fetch".
+    if (
+      error instanceof TypeError ||
+      (typeof error?.message === 'string' && error.message.toLowerCase().includes('failed to fetch'))
+    ) {
+      if (typeof navigator !== 'undefined' && navigator && navigator.onLine === false) {
+        throw new Error('Failed to execute agent: you appear to be offline (no internet connection).');
+      }
+      throw new Error('Failed to execute agent: network error connecting to Gemini API. Check your internet/VPN/proxy and try again.');
+    }
+
     throw new Error(`Failed to execute agent: ${error.message}`);
   }
 };

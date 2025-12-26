@@ -1,7 +1,7 @@
 /* components/styles/WorkflowsView.css */
 
 .workflows-view {
-  padding: 32px;
+  padding: 0px 32px;
   min-height: calc(100vh - 80px);
 }
 

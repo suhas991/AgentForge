@@ -1,12 +1,14 @@
 import React from 'react';
+import { FaRobot, FaBolt, FaHistory, FaCog } from 'react-icons/fa';
 import './Sidebar.css';
 import logo from '/vite.png';
 
-const Sidebar = ({ activeView, onViewChange }) => {
+const Sidebar = ({ activeView, onViewChange, onSettingsClick }) => {
   const menuItems = [
-    { id: 'agents', label: 'Agents', icon: '🤖' },
-    { id: 'workflows', label: 'Workflows', icon: '⚡' },
-    { id: 'history', label: 'Execution History', icon: '📊' }
+    { id: 'agents', label: 'Agents', icon: FaRobot },
+    { id: 'workflows', label: 'Workflows', icon: FaBolt },
+    { id: 'history', label: 'Execution History', icon: FaHistory },
+    { id: 'settings', label: 'Settings', icon: FaCog }
   ];
 
   return (
@@ -17,24 +19,28 @@ const Sidebar = ({ activeView, onViewChange }) => {
       </div>
 
       <nav className="sidebar-nav">
-        {menuItems.map(item => (
-          <button
-            key={item.id}
-            className={`sidebar-item ${activeView === item.id ? 'active' : ''}`}
-            onClick={() => onViewChange(item.id)}
-          >
-            <span className="sidebar-icon">{item.icon}</span>
-            <span className="sidebar-label">{item.label}</span>
-          </button>
-        ))}
+        {menuItems.map(item => {
+          const IconComponent = item.icon;
+          return (
+            <button
+              key={item.id}
+              className={`sidebar-item ${activeView === item.id ? 'active' : ''}`}
+              onClick={() => {
+                if (item.id === 'settings' && onSettingsClick) {
+                  onSettingsClick();
+                } else {
+                  onViewChange(item.id);
+                }
+              }}
+            >
+              <span className="sidebar-icon">
+                <IconComponent />
+              </span>
+              <span className="sidebar-label">{item.label}</span>
+            </button>
+          );
+        })}
       </nav>
-
-      <div className="sidebar-footer">
-        <button className="sidebar-item">
-          <span className="sidebar-icon">⚙️</span>
-          <span className="sidebar-label">Settings</span>
-        </button>
-      </div>
     </aside>
   );
 };

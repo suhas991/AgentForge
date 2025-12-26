@@ -1,20 +1,7 @@
 // src/constants/models.js
 
 export const GEMINI_MODELS = [
-
-   {
-    id: "gemini-2.0-flash-live",
-    name: "Gemini 2.0 Flash Live",
-    description: "Free",
-    category: "live",
-  },
-  {
-    id: "gemini-2.5-flash-live",
-    name: "Gemini 2.5 Flash Live",
-    description: "Free",
-    category: "live",
-  },
-  // Latest 2.5 Models
+  // Current Gemini catalog (Dec 2025)
   {
     id: "gemini-2.5-flash",
     name: "Gemini 2.5 Flash",
@@ -28,36 +15,33 @@ export const GEMINI_MODELS = [
     category: "lite",
   },
   {
-    id: "gemini-2.5-pro",
-    name: "Gemini 2.5 Pro",
-    description: "Most capable model",
-    category: "pro",
-  },
-
-  // 2.0 Models
-  {
-    id: "gemini-2.0-flash",
-    name: "Gemini 2.0 Flash",
-    description: "High throughput",
+    id: "gemini-3-flash",
+    name: "Gemini 3 Flash",
+    description: "Latest text generation",
     category: "flash",
   },
-
   {
-    id: "gemini-2.0-flash-exp",
-    name: "Gemini 2.0 Flash Experimental",
-    description: "Experimental features and testing",
-    category: "exp",
+    id: "gemini-2.5-flash-tts",
+    name: "Gemini 2.5 Flash TTS",
+    description: "Text-to-speech generation",
+    category: "tts",
   },
   {
-    id: "gemini-2.0-flash-lite",
-    name: "Gemini 2.0 Flash Lite",
-    description: "Cost-efficient and fast",
-    category: "lite",
+    id: "gemini-2.5-flash-native-audio-dialog",
+    name: "Gemini 2.5 Flash Native Audio Dialog",
+    description: "Live audio dialog",
+    category: "live",
+  },
+  {
+    id: "gemini-robotics-er-1.5-preview",
+    name: "Gemini Robotics ER 1.5 Preview",
+    description: "Embodied robotics preview",
+    category: "other",
   },
 ];
 
 // Default model - using the latest and fastest
-export const DEFAULT_MODEL = "gemini-2.0-flash";
+export const DEFAULT_MODEL = "gemini-2.5-flash";
 
 // Get model display name
 export const getModelName = (modelId) => {

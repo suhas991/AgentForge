@@ -13,6 +13,7 @@ import WorkflowRunner from "../components/WorkflowRunner";
 import { useAppStore } from "../store/appStore";
 import { saveWorkflow } from "../services/indexedDB";
 import { importWorkflowFromFile, generateUniqueName } from "../services/exportImportService";
+import { FaUserCircle } from "react-icons/fa";
 import "../App.css";
 
 const Dashboard = ({
@@ -50,6 +51,11 @@ const Dashboard = ({
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
   const [editingWorkflow, setEditingWorkflow] = useState(null);
   const [workflowsKey, setWorkflowsKey] = useState(0); // Force re-render
+  
+  // Search and sort states
+  const [agentSearchQuery, setAgentSearchQuery] = useState('');
+  const [agentSortBy, setAgentSortBy] = useState('name'); // 'name', 'date', 'model'
+  const [agentSortOrder, setAgentSortOrder] = useState('asc'); // 'asc', 'desc'
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -104,15 +110,59 @@ const Dashboard = ({
 
   const helperAgent = agents.find((agent) => agent.isDefault);
 
+  // Filter and sort agents
+  const getFilteredAndSortedAgents = () => {
+    let filtered = agents.filter((agent) => !agent.isDefault);
+    
+    // Apply search filter
+    if (agentSearchQuery.trim()) {
+      const query = agentSearchQuery.toLowerCase();
+      filtered = filtered.filter(agent => 
+        agent.name.toLowerCase().includes(query) ||
+        agent.role.toLowerCase().includes(query) ||
+        agent.goal.toLowerCase().includes(query)
+      );
+    }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      
+      switch (agentSortBy) {
+        case 'name':
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case 'date':
+          const dateA = new Date(a.createdAt || 0);
+          const dateB = new Date(b.createdAt || 0);
+          comparison = dateA - dateB;
+          break;
+        case 'model':
+          comparison = a.model.localeCompare(b.model);
+          break;
+        default:
+          comparison = 0;
+      }
+      
+      return agentSortOrder === 'asc' ? comparison : -comparison;
+    });
+    
+    return filtered;
+  };
+
   return (
     <div className="app-with-sidebar">
-      <Sidebar activeView={activeView} onViewChange={setActiveView} />
+      <Sidebar 
+        activeView={activeView} 
+        onViewChange={setActiveView}
+        onSettingsClick={() => setShowSettings(true)}
+      />
 
       <div className="main-content">
         <header className="app-header">
           <div className="header-left">
             <h1>
-              {activeView === 'agents' ? 'My Agents' : 
+              {activeView === 'agents' ? 'AI Agents' : 
                activeView === 'workflows' ? 'Workflows' : 
                'Execution History'}
             </h1>
@@ -123,7 +173,9 @@ const Dashboard = ({
                 className="user-info-button"
                 onClick={() => setShowUserMenu(!showUserMenu)}
               >
-                <span className="user-avatar">👤</span>
+                <span className="user-avatar">
+                  <FaUserCircle aria-hidden="true" focusable="false" />
+                </span>
                 <span className="user-name">{userConfig?.name}</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="6 9 12 15 18 9"></polyline>
@@ -161,15 +213,22 @@ const Dashboard = ({
                     </>
                   )}
 
-                  <div className="user-menu-divider"></div>
+                  {activeView === 'workflows' && (
+                    <>
+                      <div className="user-menu-divider"></div>
 
-                  <button className="user-menu-item" onClick={() => { setShowUserMenu(false); setShowSettings(true); }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="3"></circle>
-                      <path d="M12 1v6m0 6v6m5.2-13.2l-1.5 1.5m-7.4 7.4l-1.5 1.5m13.2-.3l-1.5-1.5m-7.4-7.4l-1.5-1.5"></path>
-                    </svg>
-                    Settings
-                  </button>
+                      <button className="user-menu-item" onClick={() => { setShowUserMenu(false); document.getElementById('workflow-import-input').click(); }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="17 8 12 3 7 8"></polyline>
+                          <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Import Workflow
+                      </button>
+                    </>
+                  )}
+
+                  <div className="user-menu-divider"></div>
 
                   <button className="user-menu-item danger" onClick={() => { setShowUserMenu(false); onLogout(); }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -194,15 +253,7 @@ const Dashboard = ({
             )}
 
             {activeView === 'workflows' && (
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={() => document.getElementById('workflow-import-input').click()} className="btn-import">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                  </svg>
-                  Import Workflow
-                </button>
+              <>
                 <input
                   id="workflow-import-input"
                   type="file"
@@ -223,14 +274,14 @@ const Dashboard = ({
                   </svg>
                   Build Workflow
                 </button>
-              </div>
+              </>
             )}
           </div>
         </header>
 
         {activeView === 'agents' && (
           <>
-            {helperAgent && !isChatBotOpen && (
+            {helperAgent && !isChatBotOpen && agents.filter((agent) => !agent.isDefault).length === 0 && (
               <div className="helper-banner">
                 <div className="helper-icon">💡</div>
                 <div className="helper-content">
@@ -240,8 +291,71 @@ const Dashboard = ({
               </div>
             )}
 
+            {/* Search and Sort Controls */}
+            {agents.filter((agent) => !agent.isDefault).length > 0 && (
+              <div className="search-sort-controls">
+                <div className="search-box-container">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Search agents by name, role, or goal..."
+                    value={agentSearchQuery}
+                    onChange={(e) => setAgentSearchQuery(e.target.value)}
+                    className="search-input"
+                  />
+                  {agentSearchQuery && (
+                    <button 
+                      className="clear-search-btn"
+                      onClick={() => setAgentSearchQuery('')}
+                      title="Clear search"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                
+                <div className="sort-controls">
+                  <label>Sort by:</label>
+                  <select 
+                    value={agentSortBy} 
+                    onChange={(e) => setAgentSortBy(e.target.value)}
+                    className="sort-select"
+                  >
+                    <option value="name">Name</option>
+                    <option value="date">Date Created</option>
+                    <option value="model">Model</option>
+                  </select>
+                  
+                  <button
+                    className="sort-order-btn"
+                    onClick={() => setAgentSortOrder(agentSortOrder === 'asc' ? 'desc' : 'asc')}
+                    title={agentSortOrder === 'asc' ? 'Ascending' : 'Descending'}
+                  >
+                    {agentSortOrder === 'asc' ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="m3 8 4-4 4 4"></path>
+                        <path d="M7 4v16"></path>
+                        <path d="m21 16-4 4-4-4"></path>
+                        <path d="M17 20V4"></path>
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="m3 16 4 4 4-4"></path>
+                        <path d="M7 20V4"></path>
+                        <path d="m21 8-4-4-4 4"></path>
+                        <path d="M17 4v16"></path>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="agents-grid">
-              {agents.filter((agent) => !agent.isDefault).map((agent) => (
+              {getFilteredAndSortedAgents().map((agent) => (
                 <AgentCard
                   key={agent.id}
                   agent={agent}
@@ -250,6 +364,14 @@ const Dashboard = ({
                   onDelete={onDeleteAgent}
                 />
               ))}
+              {getFilteredAndSortedAgents().length === 0 && agentSearchQuery && (
+                <div className="no-results">
+                  <p>No agents found matching "{agentSearchQuery}"</p>
+                  <button className="btn-secondary" onClick={() => setAgentSearchQuery('')}>
+                    Clear Search
+                  </button>
+                </div>
+              )}
             </div>
           </>
         )}

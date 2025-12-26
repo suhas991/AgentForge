@@ -9,6 +9,9 @@ const WorkflowsView = ({ agents, onBuildWorkflow, onEditWorkflow, onRunWorkflow 
   const [workflows, setWorkflows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [runningWorkflowId, setRunningWorkflowId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('name'); // 'name', 'date'
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc', 'desc'
   
   const {
     notification,
@@ -61,6 +64,35 @@ const WorkflowsView = ({ agents, onBuildWorkflow, onEditWorkflow, onRunWorkflow 
     }, 500);
   };
 
+  // Filter and sort workflows
+  const getFilteredAndSortedWorkflows = () => {
+    let filtered = [...workflows];
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(workflow =>
+        workflow.name.toLowerCase().includes(query) ||
+        (workflow.description && workflow.description.toLowerCase().includes(query))
+      );
+    }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      
+      if (sortBy === 'name') {
+        comparison = a.name.localeCompare(b.name);
+      } else if (sortBy === 'date') {
+        comparison = new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+    
+    return filtered;
+  };
+
   if (loading) {
     return (
       <div className="workflows-view">
@@ -83,6 +115,44 @@ const WorkflowsView = ({ agents, onBuildWorkflow, onEditWorkflow, onRunWorkflow 
         showCancel={notification.showCancel}
       />
       
+      {workflows.length > 0 && (
+        <div className="search-sort-controls">
+          <div className="search-box-container">
+            <input
+              type="text"
+              className="search-box"
+              placeholder="Search workflows by name or description..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button className="clear-search" onClick={() => setSearchQuery('')}>
+                ✕
+              </button>
+            )}
+          </div>
+          
+          <div className="sort-controls">
+            <select
+              className="sort-dropdown"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="name">Sort by Name</option>
+              <option value="date">Sort by Date</option>
+            </select>
+            
+            <button
+              className="sort-order-btn"
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+            >
+              {sortOrder === 'asc' ? '↑' : '↓'}
+            </button>
+          </div>
+        </div>
+      )}
+      
       <div className="workflows-view">
         {workflows.length === 0 ? (
           <div className="empty-state">
@@ -94,20 +164,30 @@ const WorkflowsView = ({ agents, onBuildWorkflow, onEditWorkflow, onRunWorkflow 
             </button>
           </div>
         ) : (
-          <div className="workflows-grid">
-            {workflows.map(workflow => (
-              <WorkflowCard
-                key={workflow.id}
-                workflow={workflow}
-                agents={agents}
-              isRunning={runningWorkflowId === workflow.id}
-              onRun={() => handleRunWorkflow(workflow)}
-              onEdit={handleEdit}
-              onDelete={() => handleDelete(workflow.id)}
-            />
-          ))}
-        </div>
-      )}
+          <>
+            {getFilteredAndSortedWorkflows().length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">🔍</div>
+                <h3>No results found</h3>
+                <p>Try adjusting your search criteria</p>
+              </div>
+            ) : (
+              <div className="workflows-grid">
+                {getFilteredAndSortedWorkflows().map(workflow => (
+                  <WorkflowCard
+                    key={workflow.id}
+                    workflow={workflow}
+                    agents={agents}
+                    isRunning={runningWorkflowId === workflow.id}
+                    onRun={() => handleRunWorkflow(workflow)}
+                    onEdit={handleEdit}
+                    onDelete={() => handleDelete(workflow.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </>
   );
