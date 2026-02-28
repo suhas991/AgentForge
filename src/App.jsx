@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Landing from './pages/Landing';
 import MobileBlocker from './components/MobileBlocker';
 import NotificationModal from './components/NotificationModal';
+import ProviderSetupModal from './components/ProviderSetupModal';
 import { useNotification } from './hooks/useNotification';
 import {
   initDB,
@@ -19,6 +20,7 @@ import {
   deleteTool,
 } from './services/indexedDB';
 import { executeAgent } from './services/llmService';
+import { selectBestAvailableModel } from './services/llmService';
 import { exportAgents } from './services/exportImportService';
 import { DEFAULT_AGENTS } from './constants/defaultAgents';
 import { DEFAULT_TOOLS } from './constants/defaultTools';
@@ -59,6 +61,8 @@ function App() {
     setShowImportModal,
     showOnboarding,
     setShowOnboarding,
+    showProviderSetup,
+    setShowProviderSetup,
     showUserMenu,
     setShowUserMenu,
     theme,
@@ -226,9 +230,32 @@ function App() {
     setUserConfig(config);
     localStorage.setItem('userConfig', JSON.stringify(config));
     setShowOnboarding(false);
+    
+    // Show provider setup modal after onboarding
+    setShowProviderSetup(true);
+  };
+
+  const handleProviderSetupComplete = async (config) => {
+    setUserConfig(config);
+    setShowProviderSetup(false);
     setIsLoading(true);
     await initializeApp();
     navigate('/dashboard');
+  };
+
+  const handleProviderSetupSkip = async () => {
+    setShowProviderSetup(false);
+    setIsLoading(true);
+    await initializeApp();
+    navigate('/dashboard');
+    
+    // Show warning after navigation
+    setTimeout(() => {
+      showWarning(
+        'You can configure AI providers anytime from Settings. Without API keys, you won\'t be able to run agents.',
+        'Provider Setup Skipped'
+      );
+    }, 500);
   };
 
   const handleLogout = async () => {
@@ -312,7 +339,20 @@ function App() {
     if (!helperAgent) {
       throw new Error('Helper agent not available. Please refresh the page.');
     }
-    return await executeAgent(helperAgent, message, {}, []);
+    
+    // Select best available model based on configured API keys
+    const bestModel = selectBestAvailableModel();
+    if (!bestModel) {
+      throw new Error('No AI provider configured. Please add an API key in Settings (Gemini or Groq) to use the chatbot.');
+    }
+    
+    // Update agent's model dynamically
+    const agentWithBestModel = {
+      ...helperAgent,
+      model: bestModel
+    };
+    
+    return await executeAgent(agentWithBestModel, message, {}, []);
   };
 
   const handleRunAgent = async (agent, input, customParams, uploadedFiles = []) => {
@@ -366,6 +406,14 @@ function App() {
         cancelText={notification.cancelText}
         showCancel={notification.showCancel}
       />
+      
+      {showProviderSetup && (
+        <ProviderSetupModal
+          onComplete={handleProviderSetupComplete}
+          onSkip={handleProviderSetupSkip}
+          currentConfig={userConfig}
+        />
+      )}
       
       <Routes>
         <Route

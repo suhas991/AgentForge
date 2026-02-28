@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import CustomParametersField from './CustomParametersField';
 import RAGManager from './RAGManager';
 import { getAllTools } from '../services/indexedDB';
-import { GEMINI_MODELS, DEFAULT_MODEL } from '../constants/models';
+import { DEFAULT_MODEL, getModelsGroupedByProvider, getModelName } from '../constants/models';
+import { canUseModel } from '../constants/providers';
 
 const AgentForm = ({ onSave, initialData = null, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -22,6 +23,27 @@ const AgentForm = ({ onSave, initialData = null, onCancel }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
   const [availableTools, setAvailableTools] = useState([]);
+
+  const getUserConfig = () => {
+    const userConfigStr = localStorage.getItem('userConfig');
+    if (!userConfigStr) return null;
+    try {
+      return JSON.parse(userConfigStr);
+    } catch {
+      return null;
+    }
+  };
+
+  const userConfig = getUserConfig();
+  const groupedModels = getModelsGroupedByProvider(userConfig, { enabledOnly: true })
+    .map(group => ({
+      ...group,
+      models: group.models.filter(model => canUseModel(model.id, userConfig))
+    }))
+    .filter(group => group.models.length > 0);
+
+  const availableModelIds = groupedModels.flatMap(group => group.models.map(model => model.id));
+  const isCurrentModelAvailable = availableModelIds.includes(formData.model);
 
   useEffect(() => {
     loadTools();
@@ -158,12 +180,24 @@ const AgentForm = ({ onSave, initialData = null, onCancel }) => {
           required
           disabled={isSaving}
         >
-          {GEMINI_MODELS.map(model => (
-            <option key={model.id} value={model.id}>
-              {model.name} - {model.description}
+          {!isCurrentModelAvailable && formData.model && (
+            <option value={formData.model}>
+              {getModelName(formData.model)} (currently saved)
             </option>
+          )}
+          {groupedModels.map(group => (
+            <optgroup key={group.providerId} label={`${group.icon} ${group.name}`}>
+              {group.models.map(model => (
+                <option key={model.id} value={model.id}>
+                  {model.name} - {model.description}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
+        <p className="form-help-text" style={{ marginTop: '4px', fontSize: '12px', color: '#666' }}>
+          Models shown here come from Providers configuration and your selected checkboxes.
+        </p>
       </div>
 
       <div className="form-group">

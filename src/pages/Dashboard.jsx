@@ -13,6 +13,7 @@ import WorkflowBuilder from "../components/WorkflowBuilder";
 import WorkflowRunner from "../components/WorkflowRunner";
 import ToolsView from "../components/ToolsView";
 import ToolBuilder from "../components/ToolBuilder";
+import ProvidersView from "../components/ProvidersView";
 import { useAppStore } from "../store/appStore";
 import { saveWorkflow, saveTool, saveAgent, getAllAgents } from "../services/indexedDB";
 import { FaUserCircle } from "react-icons/fa";
@@ -227,8 +228,7 @@ const Dashboard = ({
             <h1>
               {activeView === 'agents' ? 'AI Agents' : 
                activeView === 'workflows' ? 'Workflows' :
-               activeView === 'tools' ? 'Tools' :
-               'Execution History'}
+               activeView === 'tools' ? 'Tools' :               activeView === 'providers' ? 'AI Providers' :               'Execution History'}
             </h1>
           </div>
           <div className="header-right">
@@ -455,6 +455,8 @@ const Dashboard = ({
             onTestTool={handleTestTool}
           />
         )}
+
+        {activeView === 'providers' && <ProvidersView />}
 
         {activeView === 'history' && <ExecutionHistory />}
 

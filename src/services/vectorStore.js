@@ -26,14 +26,14 @@ const initVectorDB = async () => {
 /**
  * Generate embeddings using Gemini API
  */
-export const generateEmbedding = async (text, apiKey) => {
+export const generateEmbedding = async (text, apiKey, embeddingModel = 'text-embedding-004') => {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${embeddingModel}:embedContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'models/text-embedding-004',
+        model: `models/${embeddingModel}`,
         content: {
           parts: [{ text }]
         }
@@ -79,7 +79,7 @@ const cosineSimilarity = (vecA, vecB) => {
 /**
  * Add document to vector store
  */
-export const addDocument = async (agentId, filename, content, apiKey) => {
+export const addDocument = async (agentId, filename, content, apiKey, embeddingModel = 'text-embedding-004') => {
   const db = await initVectorDB();
   const chunks = chunkText(content);
   
@@ -87,13 +87,14 @@ export const addDocument = async (agentId, filename, content, apiKey) => {
   
   for (let i = 0; i < chunks.length; i++) {
     const chunk = chunks[i];
-    const embedding = await generateEmbedding(chunk, apiKey);
+    const embedding = await generateEmbedding(chunk, apiKey, embeddingModel);
     
     documents.push({
       agentId,
       filename,
       content: chunk,
       embedding,
+      embeddingModel,
       chunkIndex: i,
       timestamp: new Date().toISOString()
     });
@@ -111,15 +112,20 @@ export const addDocument = async (agentId, filename, content, apiKey) => {
 /**
  * Search similar documents
  */
-export const searchSimilarDocuments = async (agentId, query, apiKey, topK = 5) => {
+export const searchSimilarDocuments = async (agentId, query, apiKey, topK = 5, embeddingModel = 'text-embedding-004') => {
   const db = await initVectorDB();
-  const queryEmbedding = await generateEmbedding(query, apiKey);
+  const queryEmbedding = await generateEmbedding(query, apiKey, embeddingModel);
   
   const tx = db.transaction(STORE_NAME, 'readonly');
   const index = tx.store.index('agentId');
   const allDocs = await index.getAll(agentId);
+
+  const filteredDocs = allDocs.filter((doc) => {
+    const docModel = doc.embeddingModel || 'text-embedding-004';
+    return docModel === embeddingModel;
+  });
   
-  const similarities = allDocs.map(doc => ({
+  const similarities = filteredDocs.map(doc => ({
     ...doc,
     similarity: cosineSimilarity(queryEmbedding, doc.embedding)
   }));

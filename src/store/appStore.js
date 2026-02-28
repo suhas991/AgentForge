@@ -45,6 +45,9 @@ export const useAppStore = create((set) => ({
   showOnboarding: false,
   setShowOnboarding: (show) => set({ showOnboarding: show }),
 
+  showProviderSetup: false,
+  setShowProviderSetup: (show) => set({ showProviderSetup: show }),
+
   // ==================== EDITING STATE ====================
   editingAgent: null,
   setEditingAgent: (agent) => set({ editingAgent: agent }),

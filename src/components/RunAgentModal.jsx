@@ -7,7 +7,8 @@ import remarkGfm from "remark-gfm";
 import { MdAttachFile } from "react-icons/md";
 import CopyButton from "./CopyButton";
 import RAGManager from "./RAGManager";
-import { GEMINI_MODELS, getModelName } from "../constants/models";
+import { getModelName, getModelsGroupedByProvider } from "../constants/models";
+import { canUseModel } from "../constants/providers";
 import "./RunAgentModal.css";
 import { saveExecutionLog } from "../services/indexedDB";
 import { downloadOutput } from "../services/downloadService";
@@ -36,6 +37,28 @@ const RunAgentModal = ({ agent, onRun, onClose }) => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
+
+  // Get user config for model filtering
+  const getUserConfig = () => {
+    const userConfigStr = localStorage.getItem('userConfig');
+    if (!userConfigStr) return null;
+    try {
+      return JSON.parse(userConfigStr);
+    } catch {
+      return null;
+    }
+  };
+
+  const userConfig = getUserConfig();
+  const groupedModels = getModelsGroupedByProvider(userConfig, { enabledOnly: true });
+  
+  // Filter models to only show those with configured API keys
+  const availableGroupedModels = groupedModels
+    .map(group => ({
+      ...group,
+      models: group.models.filter(model => canUseModel(model.id, userConfig))
+    }))
+    .filter(group => group.models.length > 0); // Only show providers with available models
 
   React.useEffect(() => {
     const defaults = {};
@@ -326,11 +349,21 @@ const RunAgentModal = ({ agent, onRun, onClose }) => {
               onChange={(e) => setSelectedModel(e.target.value)}
               className="model-selector"
             >
-              {GEMINI_MODELS.map((model) => (
-                <option key={model.id} value={model.id}>
-                  {model.name} - {model.description}
+              {availableGroupedModels.length > 0 ? (
+                availableGroupedModels.map((group) => (
+                  <optgroup key={group.providerId} label={`${group.icon} ${group.name}`}>
+                    {group.models.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.name} - {model.description}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))
+              ) : (
+                <option value="" disabled>
+                  No models available - Please configure API keys in Settings
                 </option>
-              ))}
+              )}
             </select>
             {selectedModel !== agent.model && (
               <div className="model-change-notice">

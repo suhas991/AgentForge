@@ -6,6 +6,7 @@ import {
   deleteDocument 
 } from '../services/vectorStore';
 import { parseFile, isFileSupported, getSupportedExtensions } from '../services/fileParser';
+import { getSelectedEmbeddingModel } from '../constants/models';
 import './RAGManager.css';
 
 const RAGManager = ({ agent, onUpdate }) => {
@@ -13,13 +14,14 @@ const RAGManager = ({ agent, onUpdate }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
 
-  // Get API key from localStorage
+  // Get API key from localStorage (RAG requires Gemini for embeddings)
   const getApiKey = () => {
     const userConfig = localStorage.getItem('userConfig');
     if (userConfig) {
       try {
         const config = JSON.parse(userConfig);
-        return config.apiKey;
+        // RAG embeddings require Gemini API key (text-embedding-004)
+        return config.geminiApiKey || config.apiKey;
       } catch (error) {
         console.error('Error parsing user config:', error);
       }
@@ -49,7 +51,7 @@ const RAGManager = ({ agent, onUpdate }) => {
 
     const apiKey = getApiKey();
     if (!apiKey) {
-      alert('API key not found. Please configure your API key in settings.');
+      alert('Gemini API key not found. RAG knowledge base requires Gemini API key for embeddings. Please configure it in Settings.');
       return;
     }
 
@@ -72,11 +74,13 @@ const RAGManager = ({ agent, onUpdate }) => {
       }
       
       setUploadProgress(`Processing and creating embeddings...`);
+      const embeddingModel = getSelectedEmbeddingModel('gemini');
       const chunksAdded = await addDocument(
         agent.id, 
         file.name, 
         content, 
-        apiKey
+        apiKey,
+        embeddingModel
       );
 
       setUploadProgress(`✓ Added ${chunksAdded} chunks from ${file.name}`);

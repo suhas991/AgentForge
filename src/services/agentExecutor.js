@@ -4,8 +4,11 @@
 import { getToolById } from './indexedDB';
 import { executeTool, parseFunctionCalls } from './toolExecutor';
 import { searchSimilarDocuments } from './vectorStore';
+import { getModelProvider } from '../constants/models';
+import { getApiKeyForProvider } from './llmService';
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+const GROQ_API_BASE = 'https://api.groq.com/openai/v1';
 const MAX_ITERATIONS = 10; // Prevent infinite loops
 
 /**
@@ -24,20 +27,36 @@ export async function executeAgentWithTools(agent, userInput, customParams, apiK
   const toolExecutionLog = [];
   let iteration = 0;
   
+  // Determine provider for this agent's model
+  const providerId = getModelProvider(agent.model);
+  
   // Build initial system prompt
   const systemPrompt = await buildSystemPrompt(agent, customParams, apiKey, userInput);
   
-  // Get Gemini parameters
-  const geminiParams = extractGeminiParameters(customParams);
+  // Get parameters based on provider
+  const llmParams = extractLLMParameters(customParams, providerId);
   
   // Load tools if agent has them
   const agentTools = await loadAgentTools(agent);
   
-  // Initial user message
-  conversationHistory.push({
-    role: 'user',
-    parts: [{ text: `${systemPrompt}\n\n---\n\nUser Request: ${userInput}` }]
-  });
+  // Initial user message (format depends on provider)
+  if (providerId === 'groq') {
+    // Groq uses OpenAI-style messages
+    conversationHistory.push({
+      role: 'system',
+      content: systemPrompt
+    });
+    conversationHistory.push({
+      role: 'user',
+      content: userInput
+    });
+  } else {
+    // Gemini uses parts-based format
+    conversationHistory.push({
+      role: 'user',
+      parts: [{ text: `${systemPrompt}\n\n---\n\nUser Request: ${userInput}` }]
+    });
+  }
   
   // Conversation loop
   while (iteration < MAX_ITERATIONS) {
@@ -45,14 +64,25 @@ export async function executeAgentWithTools(agent, userInput, customParams, apiK
     console.log(`\n📍 Iteration ${iteration}/${MAX_ITERATIONS}`);
     
     try {
-      // Call LLM
-      const response = await callGeminiAPI(
-        agent.model,
-        conversationHistory,
-        geminiParams,
-        agentTools,
-        apiKey
-      );
+      // Call LLM based on provider
+      let response;
+      if (providerId === 'groq') {
+        response = await callGroqAPI(
+          agent.model,
+          conversationHistory,
+          llmParams,
+          agentTools,
+          apiKey
+        );
+      } else {
+        response = await callGeminiAPI(
+          agent.model,
+          conversationHistory,
+          llmParams,
+          agentTools,
+          apiKey
+        );
+      }
       
       if (!response || !response.text) {
         throw new Error('Invalid response from LLM');
@@ -61,10 +91,17 @@ export async function executeAgentWithTools(agent, userInput, customParams, apiK
       console.log('🤖 LLM Response:', response.text.substring(0, 200) + '...');
       
       // Add assistant response to history
-      conversationHistory.push({
-        role: 'model',
-        parts: [{ text: response.text }]
-      });
+      if (providerId === 'groq') {
+        conversationHistory.push({
+          role: 'assistant',
+          content: response.text
+        });
+      } else {
+        conversationHistory.push({
+          role: 'model',
+          parts: [{ text: response.text }]
+        });
+      }
       
       // Check if LLM wants to use a tool
       const functionCalls = parseFunctionCalls(response.text);
@@ -108,15 +145,20 @@ export async function executeAgentWithTools(agent, userInput, customParams, apiK
           result: toolResult
         });
         
-        // Add tool result to conversation
-        const resultMessage = {
-          role: 'user',
-          parts: [{
-            text: `Tool "${call.name}" execution result:\n${JSON.stringify(toolResult, null, 2)}\n\nPlease continue with the task using this information.`
-          }]
-        };
+        // Add tool result to conversation (format depends on provider)
+        const resultText = `Tool "${call.name}" execution result:\n${JSON.stringify(toolResult, null, 2)}\n\nPlease continue with the task using this information.`;
         
-        conversationHistory.push(resultMessage);
+        if (providerId === 'groq') {
+          conversationHistory.push({
+            role: 'user',
+            content: resultText
+          });
+        } else {
+          conversationHistory.push({
+            role: 'user',
+            parts: [{ text: resultText }]
+          });
+        }
       }
       
     } catch (error) {
@@ -282,6 +324,108 @@ async function callGeminiAPI(model, conversationHistory, geminiParams, tools, ap
   return {
     text: data.candidates[0].content.parts[0].text
   };
+}
+
+/**
+ * Call Groq API with conversation history
+ */
+async function callGroqAPI(model, conversationHistory, groqParams, tools, apiKey) {
+  const url = `${GROQ_API_BASE}/chat/completions`;
+  
+  // Prepare tools instruction
+  let toolsInstruction = '';
+  if (tools.length > 0) {
+    toolsInstruction = '\n\n=== AVAILABLE TOOLS ===\n';
+    toolsInstruction += 'You have access to the following tools. When you need to use a tool, output a JSON object in this exact format:\n';
+    toolsInstruction += '{"function": "tool_name", "arguments": {param1: value1, param2: value2}}\n\n';
+    
+    tools.forEach(tool => {
+      toolsInstruction += `Tool: ${tool.name}\n`;
+      toolsInstruction += `Description: ${tool.description}\n`;
+      
+      if (tool.parameters && tool.parameters.length > 0) {
+        toolsInstruction += 'Parameters:\n';
+        tool.parameters.forEach(param => {
+          toolsInstruction += `  - ${param.name} (${param.type}${param.required ? ', required' : ', optional'}): ${param.description || 'No description'}\n`;
+        });
+      }
+      
+      toolsInstruction += `Returns: ${tool.returnType}\n\n`;
+    });
+    
+    toolsInstruction += 'After receiving tool results, continue your reasoning and use the information to complete the task.\n';
+    toolsInstruction += '===================\n';
+  }
+  
+  // Add tools instruction to system message if tools exist
+  const messages = [...conversationHistory];
+  if (tools.length > 0 && messages.length > 0 && messages[0].role === 'system') {
+    messages[0] = {
+      ...messages[0],
+      content: messages[0].content + toolsInstruction
+    };
+  }
+  
+  const requestBody = {
+    model: model,
+    messages: messages,
+    temperature: groqParams.temperature || 0.7,
+    max_tokens: groqParams.max_tokens || 20000,
+    top_p: groqParams.top_p || 0.95,
+  };
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify(requestBody)
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || 'Groq API request failed');
+  }
+  
+  const data = await response.json();
+  
+  if (!data.choices || data.choices.length === 0) {
+    throw new Error('Groq API returned no choices');
+  }
+  
+  return {
+    text: data.choices[0].message.content
+  };
+}
+
+/**
+ * Extract LLM-specific parameters based on provider
+ */
+function extractLLMParameters(customParams, providerId) {
+  if (providerId === 'groq') {
+    const groqParams = {};
+    
+    const paramMapping = {
+      'temperature': 'temperature',
+      'maxtokens': 'max_tokens',
+      'max_tokens': 'max_tokens',
+      'topp': 'top_p',
+      'top_p': 'top_p',
+    };
+    
+    Object.entries(customParams).forEach(([key, value]) => {
+      if (paramMapping[key.toLowerCase()]) {
+        const groqKey = paramMapping[key.toLowerCase()];
+        groqParams[groqKey] = parseFloat(value) || value;
+      }
+    });
+    
+    return groqParams;
+  } else {
+    // Gemini parameters
+    return extractGeminiParameters(customParams);
+  }
 }
 
 /**
